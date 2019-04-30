@@ -2,6 +2,7 @@
 #include <iostream>
 #include <numeric>
 #include <chrono>
+#include <random>
 
 int main(int argc, char *argv[]) {
 
@@ -16,6 +17,9 @@ int main(int argc, char *argv[]) {
   const uint64_t COLUMN_SIZE = atoi(argv[3]);
   const uint64_t DISTINCT_VALUES = atoi(argv[4]);
   std::vector<uint64_t> input(COLUMN_SIZE), output(COLUMN_SIZE);
+
+  const size_t bigger_than_cachesize = 10 * 1024 * 1024;
+  long *p = new long[bigger_than_cachesize];
 
   for (int i = 0; i < COLUMN_SIZE; ++i)
   {
@@ -33,6 +37,11 @@ int main(int argc, char *argv[]) {
         output.push_back(i);
         //std::cout << "found " << SEARCH_VALUE << " at position " << i << std::endl;
       }
+    }
+
+    for(int i = 0; i < bigger_than_cachesize; i++)
+    {
+       p[i] = rand();
     }
   }
 
