@@ -24,16 +24,24 @@ int main(int argc, char *argv[]) {
   std::vector<uint64_t> input(COLUMN_SIZE), output(COLUMN_SIZE);
   uint64_t counter = 0;
 
+  std::random_device rd;
+
+  std::mt19937 e2(rd());
+  int min = 1, max = DISTINCT_VALUES;
+
+  std::uniform_int_distribution<int> dist(min,max);
+
   //Scan column_scan = Scan();
 
   for (uint64_t i = 0; i < COLUMN_SIZE; ++i) {
-    input[i] = i % DISTINCT_VALUES;
+    input[i] = dist(e2);
   }
 
-  const auto before = std::chrono::system_clock::now();
+  const auto before = std::chrono::steady_clock::now();
 
   switch(COUNT_MODE) {
     case 0:
+      std::cout << COUNT_MODE << std::endl;
       for (uint64_t run = 0; run < RUN_COUNT; ++run) {
         for (uint64_t i = 0; i < COLUMN_SIZE; ++i) {
           if (input[i] == SEARCH_VALUE) {
@@ -43,6 +51,7 @@ int main(int argc, char *argv[]) {
       }
       break;
     case 1:
+      std::cout << COUNT_MODE << std::endl;
       for (uint64_t run = 0; run < RUN_COUNT; ++run) {
         for (uint64_t i = 0; i < COLUMN_SIZE; ++i) {
           if (input[i] == SEARCH_VALUE) {
@@ -56,7 +65,7 @@ int main(int argc, char *argv[]) {
       break;
   }
 
-  const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - before);
+  const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - before);
 
   std::cout << "count_mode,run_count,search_value,column_size,distinct_values,duration" << std::endl;
   std::cout << COUNT_MODE << "," << RUN_COUNT << "," << SEARCH_VALUE << "," << COLUMN_SIZE << "," << DISTINCT_VALUES << "," << duration.count()/RUN_COUNT << std::endl;
