@@ -11,12 +11,11 @@ int main(int argc, char *argv[]) {
 
   if (argc < 5)
   {
-    std::cout << "Usage: ./... <run_count> <search_value> <column_size> <distinct_values>" << std::endl;
+    std::cout << "Usage: ./... <count_mode> <run_count> <search_value> <column_size> <distinct_values>" << std::endl;
     return 1;
   }
 
 // Distribution, Random
-  // Config enum?
   const bool COUNT_MODE = atoi(argv[1]);
   const uint64_t RUN_COUNT = atoi(argv[2]);
   const uint64_t SEARCH_VALUE = atoi(argv[3]);
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
   }
 
   const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - before);
-  
+
   std::cout << "run_count,search_value,column_size,distinct_values,duration" << std::endl;
   std::cout << RUN_COUNT << "," << SEARCH_VALUE << "," << COLUMN_SIZE << "," << DISTINCT_VALUES << "," << duration.count()/RUN_COUNT << std::endl;
   return 0;
