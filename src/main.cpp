@@ -9,20 +9,20 @@
 #include "Scan.h"
 
 void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, size_t output_format, uint64_t counter, ScanConfig scanConfig) {
-  std::cout << "output_format,run_count,search_value,column_size,distinct_values,hits,duration" << std::endl;
+  std::cout << "output_format,run_count,random_values,search_value,column_size,distinct_values,hits,duration" << std::endl;
   std::cout << output_format << "," << scanConfig.RUN_COUNT << "," << scanConfig.SEARCH_VALUE << "," << scanConfig.COLUMN_SIZE << "," << scanConfig.DISTINCT_VALUES << "," << counter << "," << duration.count()/scanConfig.RUN_COUNT << std::endl;
 }
 
 int main(int argc, char *argv[]) {
 
-  if (argc < 6)
+  if (argc < 7)
   {
-    std::cout << "Usage: ./... <output_format> <run_count> <search_value> <column_size> <distinct_values>" << std::endl;
+    std::cout << "Usage: ./... <output_format> <run_count> <random_values> <search_value> <column_size> <distinct_values>" << std::endl;
     return 1;
   }
 
   //no search value but range of values or number of distinct values
-  ScanConfig scanConfig = ScanConfig(atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
+  ScanConfig scanConfig = ScanConfig(atoi(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
   const size_t OUTPUT_FORMAT = atoi(argv[1]);
   uint64_t counter = 0;
 
@@ -40,8 +40,18 @@ int main(int argc, char *argv[]) {
   positionList.reserve(scanConfig.COLUMN_SIZE);
 
   std::cout << "- Generate column data" << std::endl;
-  for (uint64_t i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
-    input[i] = dist(e2);
+  if (scanConfig.RANDOM_VALUES)
+  {
+    for (uint64_t i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
+      input[i] = dist(e2);
+    }
+  } else {
+    for (uint64_t i = 0; i < scanConfig.DISTINCT_VALUES; ++i)
+    {
+      for (uint64_t j = 0; j < scanConfig.COLUMN_SIZE; ++j) {
+        input[j] = i;
+      }
+    }
   }
 
   auto counter_lambda = [&counter] (uint64_t i) {counter++;};
