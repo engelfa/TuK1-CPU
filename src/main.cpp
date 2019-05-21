@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
 
   //TODO: No search value but range of values or number of distinct values
   //TODO: Combine scans afterwards
+  //TODO: Include cache clear
   BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]));
 
   size_t scan_count = 1;
@@ -45,13 +46,12 @@ int main(int argc, char *argv[]) {
     if (scanConfig.RANDOM_VALUES) {
       for (auto i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
         input[i] = dist(e2);
-        //std::cout << input[i] << std::endl;
       }
     } else {
-      for (auto i = 0; i < scanConfig.DISTINCT_VALUES; ++i)
-      {
+      uint64_t ratio = floor(scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES) < 1 ? 1 : floor(scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES);
+      for (auto i = 0; i < scanConfig.DISTINCT_VALUES; ++i) {
         for (auto j = 0; j < scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES; ++j) {
-          input[j] = i;
+          input[(i*ratio)+j] = i;
         }
       }
     }
