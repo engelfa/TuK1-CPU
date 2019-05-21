@@ -9,23 +9,20 @@
 #include "Scan.h"
 
 void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
-  std::cout << "output_format,run_count,random_values,search_value,column_size,distinct_values,hits,duration" << std::endl;
-  std::cout << benchmarkConfig.OUTPUT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->DISTINCT_VALUES << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << std::endl;
+  std::cout << "result_format,run_count,random_values,search_value,column_size,distinct_values,hits,duration" << std::endl;
+  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->DISTINCT_VALUES << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << std::endl;
 }
 
 int main(int argc, char *argv[]) {
 
   if (argc < 7)
   {
-    std::cout << "Usage: ./... <output_format> <run_count> <random_values> <search_value> <column_size> <distinct_values>" << std::endl;
+    std::cout << "Usage: ./... <result_format> <run_count> <random_values> <search_value> <column_size> <distinct_values>" << std::endl;
     return 1;
   }
 
   //TODO: No search value but range of values or number of distinct values
-  //TODO: Switch in function for multiple scans
   //TODO: Combine scans afterwards
-  //TODO: Scan different executes, output as parameter for execute
-
   BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]));
 
   size_t scan_count = 1;
@@ -47,13 +44,14 @@ int main(int argc, char *argv[]) {
     std::cout << "- Generate Column Data for Scan " << scan + 1 << std::endl;
     if (scanConfig.RANDOM_VALUES)
     {
-      for (uint64_t i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
+      for (auto i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
         input[i] = dist(e2);
+        std::cout << input[i] << std::endl;
       }
     } else {
-      for (uint64_t i = 0; i < scanConfig.DISTINCT_VALUES; ++i)
+      for (auto i = 0; i < scanConfig.DISTINCT_VALUES; ++i)
       {
-        for (uint64_t j = 0; j < scanConfig.COLUMN_SIZE; ++j) {
+        for (auto j = 0; j < scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES; ++j) {
           input[j] = i;
         }
       }
@@ -63,18 +61,20 @@ int main(int argc, char *argv[]) {
   }
 
   std::cout << "- Start Benchmark" << std::endl;
-  switch(benchmarkConfig.OUTPUT_FORMAT) {
+  switch(benchmarkConfig.RESULT_FORMAT) {
     case 0: {
       std::vector<uint64_t> counters(scan_count, 0);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         auto counter_before_lambda = [&counters, scan] () {counters[scan] = 0;};
-        auto counter_lambda = [&counters, scan] (uint64_t i) {counters[scan]++;};
+        auto counter_lambda = [&counters, scan] (uint64_t i) {counters[scan]++; std::cout << "test";};
 
         const auto before = std::chrono::steady_clock::now();
         scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda);
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+          std::cout << counters[scan] << std::endl;
+
         print_result(duration, benchmarkConfig, counters[0], scans[scan].config);
       }
       break;
@@ -99,7 +99,8 @@ int main(int argc, char *argv[]) {
       break;
     }
     case 2: {
-      std::vector<std::vector<char>> bitmasks(scan_count, std::vector<char>(scans[0].config->COLUMN_SIZE));
+      std::vector<std::vector<char>> bitmasks(scan_count, std::vector<char>(scans[0].config->COLUMN_SIZE, '0'));
+      std::vector<char> result(scans[0].config->COLUMN_SIZE, '1');
       uint64_t counter = 0;
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
@@ -117,6 +118,15 @@ int main(int argc, char *argv[]) {
         }
         // counter = std::count(bitmask.cbegin(), bitmask.cend(), '1');
         print_result(duration, benchmarkConfig, counter, scans[scan].config);
+      }
+
+      for (auto entry = size_t(0); entry < scans[0].config->COLUMN_SIZE; ++entry) {
+        for (auto scan = size_t(0); scan < scan_count; ++scan) {
+          if (bitmasks[scan][entry] == '0') {
+            result[entry] = '0';
+            //std::cout << "result" << result[entry] << std::endl;
+          }
+        }
       }
       break;
     }
