@@ -10,7 +10,7 @@
 
 void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
   std::cout << "result_format,run_count,random_values,search_value,column_size,distinct_values,hits,duration" << std::endl;
-  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->DISTINCT_VALUES << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << std::endl;
+  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->RANDOM_VALUES << "," << scanConfig->SEARCH_VALUE << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->DISTINCT_VALUES << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -42,11 +42,10 @@ int main(int argc, char *argv[]) {
     std::vector<uint64_t> input(scanConfig.COLUMN_SIZE);
 
     std::cout << "- Generate Column Data for Scan " << scan + 1 << std::endl;
-    if (scanConfig.RANDOM_VALUES)
-    {
+    if (scanConfig.RANDOM_VALUES) {
       for (auto i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
         input[i] = dist(e2);
-        std::cout << input[i] << std::endl;
+        //std::cout << input[i] << std::endl;
       }
     } else {
       for (auto i = 0; i < scanConfig.DISTINCT_VALUES; ++i)
@@ -67,13 +66,13 @@ int main(int argc, char *argv[]) {
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         auto counter_before_lambda = [&counters, scan] () {counters[scan] = 0;};
-        auto counter_lambda = [&counters, scan] (uint64_t i) {counters[scan]++; std::cout << "test";};
+        auto counter_lambda = [&counters, scan] (uint64_t i) {counters[scan]++;};
 
         const auto before = std::chrono::steady_clock::now();
         scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda);
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
-          std::cout << counters[scan] << std::endl;
+          //std::cout << counters[scan] << std::endl;
 
         print_result(duration, benchmarkConfig, counters[0], scans[scan].config);
       }
