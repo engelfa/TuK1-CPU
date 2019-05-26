@@ -23,10 +23,6 @@ def run(par):
 
     so, se = proc.communicate()
 
-    '''
-    if(se != ''):
-        raise Exception("Error occured in " + PROGRAM_NAME + ": " + se);
-    '''
     print(so.decode("utf-8").split('\n'))
     so = list(filter(lambda x: x != '' and x[0]!='-', so.decode("utf-8").split('\n')))
     print(so[0])
@@ -34,13 +30,9 @@ def run(par):
     results = dict(zip(so[0].split(','), so[1].split(',')))
     return results
 
-
-# <cound_mode> <run_count> <search_value> <column_size> <distinct_values>
-
-
 def generatePlot(p, yParam):
-    if(len(p) == 1):
 
+    if(len(p) == 1):
         xaxis = []
         yaxis = []
 
@@ -66,7 +58,6 @@ def generatePlot(p, yParam):
             par[p[0]['xParam']] = i
 
             generatePlot(p[1:], yParam)
-
 
 
 # set default values
