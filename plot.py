@@ -5,6 +5,7 @@ import os
 
 PROGRAM_NAME = "./build/tuk_cpu"
 PLOTS_PATH = "./plots/"
+PLOT_FORMAT = "jpg"
 
 if not os.path.exists(PLOTS_PATH):
     os.makedirs(PLOTS_PATH)
@@ -57,7 +58,7 @@ def generatePlot(p, yParam):
         plt.ylabel(yParam)
         plt.xlabel(p[0]['xParam'])
         plt.title(str(par) + '\n', fontsize=13)
-        plt.savefig(PLOTS_PATH + str(par) + '.svg')
+        plt.savefig(PLOTS_PATH + str(par) + '.' + PLOT_FORMAT)
         plt.clf()
     
     else:
@@ -71,4 +72,4 @@ def generatePlot(p, yParam):
 # set default values
 par = {'result_format':0, 'run_count':2000, 'random_values':1, 'search_value': 1000, 'column_size':1000, 'distinct_values':2000}
 
-generatePlot([{'xParam':'result_format', 'xMin':0, 'xMax':2, 'stepSize':1},{'xParam':'column_size', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
+generatePlot([{'xParam':'result_format', 'xMin':0, 'xMax':2, 'stepSize':1},{'xParam':'distinct_values', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
