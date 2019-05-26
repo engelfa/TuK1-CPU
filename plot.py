@@ -2,17 +2,23 @@ import subprocess
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 import os
+import shutil
+import sys
 
 PROGRAM_NAME = "./build/tuk_cpu"
 PLOTS_PATH = "./plots/"
 PLOT_FORMAT = "jpg"
 
-if not os.path.exists(PLOTS_PATH):
-    os.makedirs(PLOTS_PATH)
-
 # set pyplot style
 style.use('seaborn-poster')
 style.use('ggplot')
+
+if len(sys.argv) == 2:
+    if sys.argv[1] == "--clear" and os.path.isdir(PLOTS_PATH):
+        shutil.rmtree(PLOTS_PATH)
+
+if not os.path.exists(PLOTS_PATH):
+    os.makedirs(PLOTS_PATH)
 
 def run(par):
     proc = subprocess.Popen(PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par]),
@@ -63,4 +69,4 @@ def generatePlot(p, yParam):
 # set default values
 par = {'result_format':0, 'run_count':2000, 'random_values':1, 'search_value': 1000, 'column_size':1000, 'distinct_values':2000}
 
-generatePlot([{'xParam':'result_format', 'xMin':0, 'xMax':2, 'stepSize':1},{'xParam':'distinct_values', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
+generatePlot([{'xParam':'random_values', 'xMin':0, 'xMax':1, 'stepSize':1},{'xParam':'column_size', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
