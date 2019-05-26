@@ -1,15 +1,17 @@
 import subprocess
-import argparse
 import matplotlib.pyplot as plt
-
-
-parser = argparse.ArgumentParser(description='Test and plot CPU runtime for lookup')
-args = parser.parse_args()
-
-xaxis = []
-yaxis = []
+import matplotlib.style as style
+import os
 
 PROGRAM_NAME = "./build/tuk_cpu"
+PLOTS_PATH = "./plots/"
+
+if not os.path.exists(PLOTS_PATH):
+    os.makedirs(PLOTS_PATH)
+
+# set pyplot style
+style.use('seaborn-poster')
+style.use('ggplot')
 
 def run(par):
     proc = subprocess.Popen(PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par]),
@@ -34,30 +36,39 @@ def run(par):
 
 # <cound_mode> <run_count> <search_value> <column_size> <distinct_values>
 
-par = {'result_format':0, 'run_count':2000, 'random_values':1, 'search_value': 1000, 'column_size':1000, 'distinct_values':2000}
-print(par.values)
 
-def generatePlot(xParam, yParam, xMin, xMax, StepSize):
-    for i in range(xMin,xMax+1,StepSize):
-        par[xParam] = i
+def generatePlot(p, yParam):
+    if(len(p) == 1):
 
-        results = run(list(par.values()))
-        print(results)
+        xaxis = []
+        yaxis = []
 
-        yaxis.append(int(results[yParam]))
+        for i in range(p[0]['xMin'],p[0]['xMax']+1,p[0]['stepSize']):
+            par[p[0]['xParam']] = i
+
+            results = run(list(par.values()))
+            print(results)
+
+            yaxis.append(int(results[yParam]))
+            
+            xaxis.append(i)
         
-        xaxis.append(i)
+        plt.plot(xaxis,yaxis)
+        plt.ylabel(yParam)
+        plt.xlabel(p[0]['xParam'])
+        plt.title(str(par) + '\n', fontsize=13)
+        plt.savefig(PLOTS_PATH + str(par) + '.svg')
+        plt.clf()
+    
+    else:
+        for i in range(p[0]['xMin'],p[0]['xMax']+1,p[0]['stepSize']):
+            par[p[0]['xParam']] = i
 
-    plt.plot(xaxis,yaxis)
-    plt.ylabel(yParam)
-    plt.xlabel(xParam)
-    plt.title(str(par), fontsize=9)
-    plt.show()
+            generatePlot(p[1:], yParam)
 
 
 
-generatePlot('column_size','duration', 1000, 10000, 1000)
+# set default values
+par = {'result_format':0, 'run_count':2000, 'random_values':1, 'search_value': 1000, 'column_size':1000, 'distinct_values':2000}
 
-
-
-
+generatePlot([{'xParam':'result_format', 'xMin':0, 'xMax':2, 'stepSize':1},{'xParam':'column_size', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
