@@ -73,7 +73,7 @@ def generatePlot(p, yParam):
         plt.title(str(par) + '\n', fontsize=13)
         timestamp = time.strftime('%Y-%m-%d-%H%M%S')
         filename = '-'.join([f'{k}-{v}' for k, v in par.items()])
-        plt.savefig(PLOTS_PATH + filename + '-' + timestamp + '.' + PLOT_FORMAT)
+        plt.savefig(PLOTS_PATH + timestamp + '-' + filename + '.' + PLOT_FORMAT)
         plt.clf()
     else:
         for i in range(p[0]['xMin'],p[0]['xMax']+1, p[0]['stepSize']):
