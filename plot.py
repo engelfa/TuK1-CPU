@@ -1,13 +1,26 @@
 import subprocess
+import shutil
+import os
+
 import matplotlib.pyplot as plt
 import matplotlib.style as style
-import os
-import shutil
 import sys
+from tqdm import tqdm
 
-PROGRAM_NAME = "./build/tuk_cpu"
+PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
-PLOT_FORMAT = "jpg"
+PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
+DEBUG = False
+
+
+if DEBUG:
+    tqdm = lambda x, **y: x
+
+
+def dlog(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
+
 
 # set pyplot style
 style.use('seaborn-poster')
@@ -20,53 +33,57 @@ if len(sys.argv) == 2:
 if not os.path.exists(PLOTS_PATH):
     os.makedirs(PLOTS_PATH)
 
+
 def run(par):
-    proc = subprocess.Popen(PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par]),
+    cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
+    proc = subprocess.Popen(
+        cmd_call,
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE)
-
     so, se = proc.communicate()
-
-    print(so.decode("utf-8").split('\n'))
-    so = list(filter(lambda x: x != '' and x[0]!='-', so.decode("utf-8").split('\n')))
-    print(so[0])
-    print(so[1])
+    so = so.decode("utf-8")
+    if len(so) == 0:
+        print(f'Calling `{cmd_call}` failed')
+        print('Error response: ', se.decode("utf-8"))
+        raise ValueError('No response from subprocess!')
+    dlog(so.split('\n'))
+    so = list(filter(lambda x: x != '' and x[0] != '-', so.split('\n')))
+    dlog(so[0])
+    dlog(so[1])
     results = dict(zip(so[0].split(','), so[1].split(',')))
     return results
 
-def generatePlot(p, yParam):
 
+def generatePlot(p, yParam):
     if(len(p) == 1):
         xaxis = []
         yaxis = []
-
-        for i in range(p[0]['xMin'],p[0]['xMax']+1,p[0]['stepSize']):
+        for i in tqdm(range(p[0]['xMin'],p[0]['xMax']+1,p[0]['stepSize']), ascii=True):
             par[p[0]['xParam']] = i
-
             results = run(list(par.values()))
-            print(results)
-
+            dlog(results)
             yaxis.append(int(results[yParam]))
-            
             xaxis.append(i)
-        
         plt.plot(xaxis,yaxis)
         plt.ylabel(yParam)
         plt.xlabel(p[0]['xParam'])
         plt.title(str(par) + '\n', fontsize=13)
-        plt.savefig(PLOTS_PATH + str(par) + '.' + PLOT_FORMAT)
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()])
+        plt.savefig(PLOTS_PATH + filename + '.' + PLOT_FORMAT)
         plt.clf()
-    
     else:
-        for i in range(p[0]['xMin'],p[0]['xMax']+1,p[0]['stepSize']):
+        for i in range(p[0]['xMin'],p[0]['xMax']+1, p[0]['stepSize']):
             par[p[0]['xParam']] = i
-
             generatePlot(p[1:], yParam)
 
 
 # set default values
-par = {'result_format':0, 'run_count':2000, 'random_values':1, 'search_value': 1000, 'column_size':1000, 'distinct_values':2000}
+par = {'result_format': 0, 'run_count': 2000, 'random_values': 1,
+       'search_value':  1000, 'column_size': 1000, 'distinct_values': 2000}
 
-generatePlot([{'xParam':'random_values', 'xMin':0, 'xMax':1, 'stepSize':1},{'xParam':'column_size', 'xMin':1000, 'xMax':10000, 'stepSize':1000}],'duration')
+generatePlot(
+    [{'xParam': 'random_values', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
+     {'xParam': 'column_size', 'xMin': 1000, 'xMax': 10000, 'stepSize': 1000}],
+    'duration')

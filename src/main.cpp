@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
   if (argc < 7)
   {
     std::cout << "Usage: ./... <result_format> <run_count> <random_values> <search_value> <column_size> <distinct_values>" << std::endl;
+    std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 5 100000 100" << std::endl;
     return 1;
   }
 
@@ -32,14 +33,14 @@ int main(int argc, char *argv[]) {
 
   for (auto scan = size_t(0); scan < scan_count; ++scan) {
     ScanConfig scanConfig(atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
-    
+
     // Create random generator
     std::random_device rd;
     std::mt19937 e2(rd());
     uint64_t min = 0, max = scanConfig.DISTINCT_VALUES - 1;
     std::uniform_int_distribution<uint64_t> dist(min,max);
 
-    std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;  
+    std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;
     std::vector<uint64_t> input(scanConfig.COLUMN_SIZE);
 
     std::cout << "- Generate Column Data for Scan " << scan + 1 << std::endl;
