@@ -44,10 +44,13 @@ int main(int argc, char *argv[]) {
     std::vector<uint64_t> input(scanConfig.COLUMN_SIZE);
 
     std::cout << "- Generate Column Data for Scan " << scan + 1 << std::endl;
+    // Draw {col_size} times from a normal distribution with {distinct_val} steps
     if (scanConfig.RANDOM_VALUES) {
       for (auto i = 0; i < scanConfig.COLUMN_SIZE; ++i) {
         input[i] = dist(e2);
       }
+    // Sequentially insert each value from [0, distinct_val] for
+    // {col_size//distinct_val} times. This requires col_size > distinct_val.
     } else {
       uint64_t ratio = floor(scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES) < 1 ? 1 : floor(scanConfig.COLUMN_SIZE/scanConfig.DISTINCT_VALUES);
       for (auto i = 0; i < scanConfig.DISTINCT_VALUES; ++i) {
@@ -56,12 +59,12 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
 
   std::cout << "- Start Benchmark" << std::endl;
   switch(benchmarkConfig.RESULT_FORMAT) {
+    // Iterate over whole data array and count the occurrences of Scan->SEARCH_VALUE
     case 0: {
       std::vector<uint64_t> counters(scan_count, 0);
 
@@ -73,17 +76,15 @@ int main(int argc, char *argv[]) {
         scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda);
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
-          //std::cout << counters[scan] << std::endl;
-
+        // Return counters for first scan (since there is currently only one scan)
         print_result(duration, benchmarkConfig, counters[0], scans[scan].config);
       }
       break;
     }
+    // For each match (with search value), store the index in a indizes list
     case 1: {
       std::vector<std::vector<uint64_t>> positionLists(scan_count);
-
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
-        // Counter is only last run
         positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
         auto positionList_lambda = [&positionLists, scan] (uint64_t i) {positionLists[scan].push_back(i);};
         auto positionList_before_lambda = [&positionLists, scan] () {positionLists[scan].clear();};
@@ -93,6 +94,7 @@ int main(int argc, char *argv[]) {
         scans[scan].execute(benchmarkConfig.RUN_COUNT, positionList_lambda, positionList_before_lambda);
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+        // Only first scan; counter is from last run only (it's cleared before every run)
         counter = positionLists[0].size();
         print_result(duration, benchmarkConfig, counter, scans[scan].config);
       }
@@ -104,7 +106,6 @@ int main(int argc, char *argv[]) {
       uint64_t counter = 0;
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
-        // Counter is only last run
         auto bitmask_lambda = [&bitmasks, scan] (uint64_t i) {bitmasks[scan][i] = '1';};
         auto bitmask_before_lambda = [&bitmasks, scan] () {bitmasks[scan].clear();};
 
@@ -112,11 +113,12 @@ int main(int argc, char *argv[]) {
         scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda);
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+        // Manually count since count(bitmask.begin() ...) did not work.
+        // Again only for first scan and last run
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmasks[scan][i] == '1')
             counter++;
         }
-        // counter = std::count(bitmask.cbegin(), bitmask.cend(), '1');
         print_result(duration, benchmarkConfig, counter, scans[scan].config);
       }
 
@@ -124,7 +126,6 @@ int main(int argc, char *argv[]) {
         for (auto scan = size_t(0); scan < scan_count; ++scan) {
           if (bitmasks[scan][entry] == '0') {
             result[entry] = '0';
-            //std::cout << "result" << result[entry] << std::endl;
           }
         }
       }
