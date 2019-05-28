@@ -22,9 +22,12 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  //TODO: No search value but range of values or number of distinct values
-  //TODO: Combine scans afterwards
-  //TODO: Include cache clear
+  // TODO: No search value but range of values or number of distinct values
+  // TODO: Combine scans afterwards
+  // TODO: Include cache clear
+  // TODO: graph -> all output formats in one diagram
+  // TODO: graph -> comparison of different runs in one diagram
+  // TODO: graph -> normalization rows/s
   BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]));
 
   size_t scan_count = 1;
