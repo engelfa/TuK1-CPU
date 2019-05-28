@@ -15,8 +15,7 @@ void print_result(const std::chrono::duration<long long int, std::ratio<1, 10000
 
 int main(int argc, char *argv[]) {
 
-  if (argc < 6)
-  {
+  if (argc < 6) {
     std::cout << "Usage: ./... <result_format> <run_count> <random_values> <column_size> <selectivity>" << std::endl;
     std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 100000 0.1" << std::endl;
     return 1;
