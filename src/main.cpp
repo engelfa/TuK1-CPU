@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   if (argc < 7)
   {
     std::cout << "Usage: ./... <result_format> <run_count> <random_values> <search_value> <column_size> <distinct_values>" << std::endl;
-    std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 5 100000 100" << std::endl;
+    std::cout << "For example:  ./tuk_cpu 0 1000 0 5 100000 100" << std::endl;
     return 1;
   }
 

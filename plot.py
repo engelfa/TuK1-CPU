@@ -36,7 +36,7 @@ def execute():
     # Prepare plotting directory
     os.makedirs(PLOTS_PATH, exist_ok=True)
     # Ensure that the program exists
-    assert glob.glob(f'{PROGRAM_NAME}.*'), \
+    assert glob.glob(f'{PROGRAM_NAME}*'), \
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
