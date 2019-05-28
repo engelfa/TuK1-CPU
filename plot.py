@@ -40,17 +40,25 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 10000, 'random_values': 1,
-           'search_value':  5, 'column_size': 200000, 'distinct_values': 1000}
+    par = {'result_format': 0, 'run_count': 2000, 'random_values': 0,
+            'column_size': 200000, 'selectivity': 0.01}
     generatePlot(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
-        {'xParam': 'distinct_values', 'xMin': 500, 'xMax': 5000, 'stepSize': 500}],
+        {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 1}],
         'duration')
 
 
 def dlog(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
+
+def frange(start, stop, step):
+    r = start
+    i = 0
+    while r <= stop:
+        yield r
+        i += 1
+        r = i * step + start
 
 
 def run(par):
@@ -79,8 +87,8 @@ def generatePlot(p, yParam):
     if(len(p) == 1):
         xaxis = []
         yaxis = []
-        steps = range(p[0]['xMin'], p[0]['xMax']+1, p[0]['stepSize'])
-        for i in tqdm(steps, ascii=True):
+        steps = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        for i in tqdm(steps, total=p[0]['xMax']/p[0]['stepSize']+1, ascii=True):
             par[p[0]['xParam']] = i
             results = run(list(par.values()))
             dlog(results)
@@ -95,7 +103,7 @@ def generatePlot(p, yParam):
         plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
         plt.clf()
     else:
-        for i in range(p[0]['xMin'], p[0]['xMax']+1, p[0]['stepSize']):
+        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
             par[p[0]['xParam']] = i
             generatePlot(p[1:], yParam)
 
