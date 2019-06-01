@@ -36,20 +36,29 @@ def execute():
     # Prepare plotting directory
     os.makedirs(PLOTS_PATH, exist_ok=True)
     # Ensure that the program exists
-    assert glob.glob(f'{PROGRAM_NAME}.*'), \
+    assert glob.glob(f'{PROGRAM_NAME}*'), \
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 10000, 'random_values': 1,
-           'search_value':  1000, 'column_size': 1000, 'distinct_values': 2000}
+    par = {'result_format': 0, 'run_count': 2000, 'random_values': 0,
+            'column_size': 200000, 'selectivity': 0.01}
     generatePlot(
-        [{'xParam': 'distinct_values', 'xMin': 500, 'xMax': 5000, 'stepSize': 500}],
+        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
+        {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 1}],
         'duration')
 
 
 def dlog(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
+
+def frange(start, stop, step):
+    r = start
+    i = 0
+    while r <= stop:
+        yield r
+        i += 1
+        r = i * step + start
 
 
 def run(par):
@@ -78,8 +87,8 @@ def generatePlot(p, yParam):
     if(len(p) == 1):
         xaxis = []
         yaxis = []
-        steps = range(p[0]['xMin'], p[0]['xMax']+1, p[0]['stepSize'])
-        for i in tqdm(steps, ascii=True):
+        steps = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        for i in tqdm(steps, total=p[0]['xMax']/p[0]['stepSize']+1, ascii=True):
             par[p[0]['xParam']] = i
             results = run(list(par.values()))
             dlog(results)
@@ -88,13 +97,13 @@ def generatePlot(p, yParam):
         plt.plot(xaxis, yaxis)
         plt.ylabel(yParam)
         plt.xlabel(p[0]['xParam'])
-        plt.title(str(par) + '\n', fontsize=13)
+        plt.title(str(par) + ';' + yParam + '\n', fontsize=13)
         timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()])
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + yParam
         plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
         plt.clf()
     else:
-        for i in range(p[0]['xMin'], p[0]['xMax']+1, p[0]['stepSize']):
+        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
             par[p[0]['xParam']] = i
             generatePlot(p[1:], yParam)
 

@@ -17,7 +17,7 @@ class Scan {
       for (size_t run = 0; run < runs; ++run) {
         before_loop();
         for (uint64_t i = 0; i < config->COLUMN_SIZE; ++i) {
-          if ((*input_column)[i] == config->SEARCH_VALUE) {
+          if ((*input_column)[i] == 0) {
             in_loop(i);
           }
         }
