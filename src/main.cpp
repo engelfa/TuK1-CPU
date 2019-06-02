@@ -5,12 +5,21 @@
 #include <random>
 #include <memory>
 #include <algorithm>
+#include <bitset>
 
 #include "Scan.h"
 
+enum ResultFormat {
+  COUNTER,
+  POSITION_LIST,
+  VECTOR_CHAR,
+  VECTOR_BOOL,
+  BITSET
+};
+
 void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
-  std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration" << std::endl;
-  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->SELECTIVITY << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << std::endl;
+  std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_s" << std::endl;
+  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->SELECTIVITY << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << "," << scanConfig->COLUMN_SIZE/(duration.count()/benchmarkConfig.RUN_COUNT) << "," << (scanConfig->COLUMN_SIZE*8)/(duration.count()/benchmarkConfig.RUN_COUNT) << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -21,11 +30,14 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  // TODO: Combine scans afterwards
+  // TODO: Multiple scans / Combine scans afterwards
   // TODO: Include cache clear
+  // TODO: Multicore execution
+  // TODO: PMCs => Branch Prediction / Cache Misses
+
   // TODO: graph -> all output formats in one diagram
   // TODO: graph -> comparison of different runs in one diagram
-  // TODO: graph -> normalization rows/s
+  // TODO: graph -> multiple scan support > write arguments in file
   BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]));
 
   size_t scan_count = 1;
@@ -71,7 +83,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "- Start Benchmark" << std::endl;
   switch(benchmarkConfig.RESULT_FORMAT) {
-    case 0: {
+    case ResultFormat::COUNTER: {
       std::vector<uint64_t> counters(scan_count, 0);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
@@ -88,7 +100,7 @@ int main(int argc, char *argv[]) {
       }
       break;
     }
-    case 1: {
+    case ResultFormat::POSITION_LIST: {
       std::vector<std::vector<uint64_t>> positionLists(scan_count);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
@@ -107,7 +119,7 @@ int main(int argc, char *argv[]) {
       }
       break;
     }
-    case 2: {
+    case ResultFormat::VECTOR_CHAR: {
       std::vector<std::vector<char>> bitmasks(scan_count, std::vector<char>(scans[0].config->COLUMN_SIZE, '0'));
       std::vector<char> result(scans[0].config->COLUMN_SIZE, '1');
       uint64_t counter = 0;
@@ -133,7 +145,37 @@ int main(int argc, char *argv[]) {
         for (auto scan = size_t(0); scan < scan_count; ++scan) {
           if (bitmasks[scan][entry] == '0') {
             result[entry] = '0';
-            //std::cout << "result" << result[entry] << std::endl;
+          }
+        }
+      }
+      break;
+    }
+    case ResultFormat::VECTOR_BOOL: {
+      std::vector<std::vector<bool>> bitmasks(scan_count, std::vector<bool>(scans[0].config->COLUMN_SIZE, false));
+      std::vector<bool> result(scans[0].config->COLUMN_SIZE, true);
+      uint64_t counter = 0;
+
+      for (auto scan = size_t(0); scan < scan_count; ++scan) {
+        // Counter is only last run
+        auto bitmask_lambda = [&bitmasks, scan] (uint64_t i) {bitmasks[scan][i] = true;};
+        auto bitmask_before_lambda = [&bitmasks, scan] () {bitmasks[scan].clear();};
+
+        const auto before = std::chrono::steady_clock::now();
+        scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda);
+        const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+            (std::chrono::steady_clock::now() - before);
+        for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
+          if(bitmasks[scan][i] == true)
+            counter++;
+        }
+        // counter = std::count(bitmasks[scan].cbegin(), bitmasks[scan].cend(), true);
+        print_result(duration, benchmarkConfig, counter, scans[scan].config);
+      }
+
+      for (auto entry = size_t(0); entry < scans[0].config->COLUMN_SIZE; ++entry) {
+        for (auto scan = size_t(0); scan < scan_count; ++scan) {
+          if (bitmasks[scan][entry] == false) {
+            result[entry] = false;
           }
         }
       }
