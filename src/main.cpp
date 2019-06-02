@@ -18,17 +18,31 @@ enum ResultFormat {
 };
 
 void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
-  std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_s" << std::endl;
-  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," << scanConfig->SELECTIVITY << "," << counter << "," << duration.count()/benchmarkConfig.RUN_COUNT << "," << scanConfig->COLUMN_SIZE/(duration.count()/benchmarkConfig.RUN_COUNT) << "," << (scanConfig->COLUMN_SIZE*8)/(duration.count()/benchmarkConfig.RUN_COUNT) << std::endl;
+  std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_sec" << std::endl;
+  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," 
+    << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," 
+    << scanConfig->SELECTIVITY << "," << counter << "," 
+    << duration.count()/benchmarkConfig.RUN_COUNT << "," 
+    << scanConfig->COLUMN_SIZE/((duration.count()/(double)1e9)/benchmarkConfig.RUN_COUNT) << "," 
+    << (scanConfig->COLUMN_SIZE*8)/((duration.count()/(double)1e9)/benchmarkConfig.RUN_COUNT) << std::endl;
 }
 
 int main(int argc, char *argv[]) {
 
   if (argc < 6) {
-    std::cout << "Usage: ./... <result_format> <run_count> <random_values> <column_size> <selectivity>" << std::endl;
-    std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 100000 0.1" << std::endl;
+    std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <random_values> <column_size> <selectivity>" << std::endl;
+    std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 0 100000 0.1" << std::endl;
     return 1;
   }
+
+  // Create random generator
+  std::random_device rd;
+  std::mt19937 e2(rd());
+  const size_t bigger_than_cachesize = 10 * 1024 * 1024;
+  long *p = p[bigger_than_cachesize];
+  uint64_t cache_clear_duration = 0;
+  std::uniform_int_distribution<uint64_t> cacheDist(0,1e12);
+
 
   // TODO: Multiple scans / Combine scans afterwards
   // TODO: Include cache clear
@@ -38,18 +52,15 @@ int main(int argc, char *argv[]) {
   // TODO: graph -> all output formats in one diagram
   // TODO: graph -> comparison of different runs in one diagram
   // TODO: graph -> multiple scan support > write arguments in file
-  BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]));
+  BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]), atoi(argv[3]));
 
   size_t scan_count = 1;
   std::vector<Scan> scans;
   scans.reserve(scan_count);
 
   for (auto scan = size_t(0); scan < scan_count; ++scan) {
-    ScanConfig scanConfig(atoi(argv[3]), atoi(argv[4]), atof(argv[5]));
+    ScanConfig scanConfig(atoi(argv[4]), atoi(argv[5]), atof(argv[6]));
 
-    // Create random generator
-    std::random_device rd;
-    std::mt19937 e2(rd());
     uint64_t min = 1, max = scanConfig.COLUMN_SIZE;
     std::uniform_int_distribution<uint64_t> dist(min,max);
 
@@ -83,6 +94,18 @@ int main(int argc, char *argv[]) {
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
 
+  if (benchmarkConfig.CLEAR_CACHE) {
+    std::cout << "- Test cache clear time" << std::endl;
+
+    const auto before = std::chrono::steady_clock::now();
+    for(auto i = 0; i < bigger_than_cachesize; ++i) {
+       p[i] = cacheDist(e2);
+    }
+    const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+        (std::chrono::steady_clock::now() - before);
+    cache_clear_duration = duration.count();
+  }
+
   std::cout << "- Start Benchmark" << std::endl;
   switch(benchmarkConfig.RESULT_FORMAT) {
     // Iterate over whole data array and count the occurrences of 0
@@ -90,8 +113,16 @@ int main(int argc, char *argv[]) {
       std::vector<uint64_t> counters(scan_count, 0);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
-        auto counter_before_lambda = [&counters, scan] () {counters[scan] = 0;};
-        auto counter_lambda = [&counters, scan] (uint64_t i) {counters[scan]++;};
+        
+        auto counter_before_lambda = benchmarkConfig.CLEAR_CACHE ?
+                                    [&counters, scan] () {counters[scan] = 0;} :
+                                    [cacheDist, e2, bigger_than_cachesize, &counters, scan] () {
+                                      for(auto i = 0; i < bigger_than_cachesize; ++i) {
+                                         p[i] = cacheDist(e2);
+                                      };
+                                      counters[scan] = 0;
+                                    };
+        auto counter_lambda = [&counters, scan] (uint64_t i) {++counters[scan];};
 
         const auto before = std::chrono::steady_clock::now();
         scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda);
