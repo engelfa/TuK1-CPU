@@ -14,6 +14,15 @@
 | max_range       | uint_64 | max value for search range in column                | no          |
 | clear_cache     | 0,1     | clear cache after each run                          | no          |
 
+## Setup this repo
+
+```
+  mkdir build
+  cd build
+  cmake ..
+  make
+```
+
 ## Setup PAPI
 
 ```

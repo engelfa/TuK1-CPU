@@ -1,11 +1,20 @@
 cmake_minimum_required(VERSION 3.5.1)
+
+set(PROJECT_NAME tuk_cpu)
+project(${PROJECT_NAME})
+
 SET(CMAKE_C_COMPILER gcc)
 SET(CMAKE_CXX_COMPILER g++)
 SET(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 SET(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wpedantic -std=c++17")
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wpedantic -std=c++17")
 
-project (tuk_cpu)
+# Add PAPI via separate cmake file
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(PAPI REQUIRED)
+
+include_directories(${PAPI_INCLUDE_DIRS})
 
 SET(SOURCES
 		src/main.cpp
@@ -13,4 +22,6 @@ SET(SOURCES
 		src/ScanConfig.h
 )
 
-add_executable(tuk_cpu ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_link_libraries(${PROJECT_NAME} ${PAPI_LIBRARIES})
