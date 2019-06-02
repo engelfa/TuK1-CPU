@@ -57,9 +57,7 @@ int main(int argc, char *argv[]) {
                             };
   auto keep_cache_lambda = [] () {};                          
 
-
   // TODO: Multiple scans / Combine scans afterwards
-  // TODO: Include cache clear
   // TODO: Multicore execution
   // TODO: PMCs => Branch Prediction / Cache Misses
 
@@ -108,10 +106,8 @@ int main(int argc, char *argv[]) {
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
 
-
   if (benchmarkConfig.CLEAR_CACHE) {
     std::cout << "- Determine Cache Clearing Duration" << std::endl;
-
 
     const auto before = std::chrono::steady_clock::now();
     for (auto i = 0; i < benchmarkConfig.RUN_COUNT/10; ++i) {
@@ -234,6 +230,7 @@ int main(int argc, char *argv[]) {
         } 
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmasks[scan][i] == true)
             counter++;
