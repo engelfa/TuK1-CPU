@@ -17,14 +17,22 @@ enum ResultFormat {
   BITSET
 };
 
-void print_result(const std::chrono::duration<long long int, std::ratio<1, 1000000000>> duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
+void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
   std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_sec" << std::endl;
   std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," 
     << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," 
     << scanConfig->SELECTIVITY << "," << counter << "," 
-    << duration.count()/benchmarkConfig.RUN_COUNT << "," 
-    << scanConfig->COLUMN_SIZE/((duration.count()/(double)1e9)/benchmarkConfig.RUN_COUNT) << "," 
-    << (scanConfig->COLUMN_SIZE*8)/((duration.count()/(double)1e9)/benchmarkConfig.RUN_COUNT) << std::endl;
+    << duration/benchmarkConfig.RUN_COUNT << "," 
+    << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << "," 
+    << (scanConfig->COLUMN_SIZE*8)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << std::endl;
+}
+
+uint64_t convert_duration(const BenchmarkConfig& benchmarkConfig, uint64_t duration, uint64_t cache_clear_duration) {
+  if (benchmarkConfig.CLEAR_CACHE) {
+    return duration - (cache_clear_duration * benchmarkConfig.RUN_COUNT);
+  } else {
+    return duration;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -39,9 +47,15 @@ int main(int argc, char *argv[]) {
   std::random_device rd;
   std::mt19937 e2(rd());
   const size_t bigger_than_cachesize = 10 * 1024 * 1024;
-  long *p = p[bigger_than_cachesize];
+  long p[bigger_than_cachesize] = {0};
   uint64_t cache_clear_duration = 0;
   std::uniform_int_distribution<uint64_t> cacheDist(0,1e12);
+  auto clear_cache_lambda = [&cacheDist, &e2, &p, &bigger_than_cachesize] () {
+                              for(auto i = 0; i < bigger_than_cachesize; ++i) {
+                                p[i] = cacheDist(e2);
+                              };
+                            };
+  auto keep_cache_lambda = [] () {};                          
 
 
   // TODO: Multiple scans / Combine scans afterwards
@@ -94,16 +108,20 @@ int main(int argc, char *argv[]) {
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
 
+
   if (benchmarkConfig.CLEAR_CACHE) {
-    std::cout << "- Test cache clear time" << std::endl;
+    std::cout << "- Determine Cache Clearing Duration" << std::endl;
+
 
     const auto before = std::chrono::steady_clock::now();
-    for(auto i = 0; i < bigger_than_cachesize; ++i) {
-       p[i] = cacheDist(e2);
+    for (auto i = 0; i < benchmarkConfig.RUN_COUNT/10; ++i) {
+      for(auto i = 0; i < bigger_than_cachesize; ++i) {
+         p[i] = cacheDist(e2);
+      }
     }
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
         (std::chrono::steady_clock::now() - before);
-    cache_clear_duration = duration.count();
+    cache_clear_duration = duration.count() / (benchmarkConfig.RUN_COUNT/10);
   }
 
   std::cout << "- Start Benchmark" << std::endl;
@@ -114,28 +132,29 @@ int main(int argc, char *argv[]) {
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         
-        auto counter_before_lambda = benchmarkConfig.CLEAR_CACHE ?
-                                    [&counters, scan] () {counters[scan] = 0;} :
-                                    [cacheDist, e2, bigger_than_cachesize, &counters, scan] () {
-                                      for(auto i = 0; i < bigger_than_cachesize; ++i) {
-                                         p[i] = cacheDist(e2);
-                                      };
-                                      counters[scan] = 0;
-                                    };
+        auto counter_before_lambda = [&counters, scan] () {counters[scan] = 0;};
         auto counter_lambda = [&counters, scan] (uint64_t i) {++counters[scan];};
 
         const auto before = std::chrono::steady_clock::now();
-        scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda);
+        if (benchmarkConfig.CLEAR_CACHE) {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda, clear_cache_lambda);
+        } else {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, counter_lambda, counter_before_lambda, keep_cache_lambda);
+        }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+
+        auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
+
         // Return counters for first scan (since there is currently only one scan)
-        print_result(duration, benchmarkConfig, counters[0], scans[scan].config);
+        print_result(converted_duration, benchmarkConfig, counters[0], scans[scan].config);
       }
       break;
     }
     // For each match (with 0), store the index in a indizes list
     case ResultFormat::POSITION_LIST: {
       std::vector<std::vector<uint64_t>> positionLists(scan_count);
+
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
         auto positionList_lambda = [&positionLists, scan] (uint64_t i) {positionLists[scan].push_back(i);};
@@ -143,12 +162,19 @@ int main(int argc, char *argv[]) {
         uint64_t counter = 0;
 
         const auto before = std::chrono::steady_clock::now();
-        scans[scan].execute(benchmarkConfig.RUN_COUNT, positionList_lambda, positionList_before_lambda);
+        if (benchmarkConfig.CLEAR_CACHE) {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, positionList_lambda, positionList_before_lambda, clear_cache_lambda);
+        } else {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, positionList_lambda, positionList_before_lambda, keep_cache_lambda);
+        }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+
+        auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
+
         // Only first scan; counter is from last run only (it's cleared before every run)
         counter = positionLists[0].size();
-        print_result(duration, benchmarkConfig, counter, scans[scan].config);
+        print_result(converted_duration, benchmarkConfig, counter, scans[scan].config);
       }
       break;
     }
@@ -162,16 +188,23 @@ int main(int argc, char *argv[]) {
         auto bitmask_before_lambda = [&bitmasks, scan] () {bitmasks[scan].clear();};
 
         const auto before = std::chrono::steady_clock::now();
-        scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda);
+        if (benchmarkConfig.CLEAR_CACHE) {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+        } else {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+        }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+
+        auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
+
         // Manually count since count(bitmask.begin() ...) did not work.
         // Again only for first scan and last run
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmasks[scan][i] == '1')
             counter++;
         }
-        print_result(duration, benchmarkConfig, counter, scans[scan].config);
+        print_result(converted_duration, benchmarkConfig, counter, scans[scan].config);
       }
 
       for (auto entry = size_t(0); entry < scans[0].config->COLUMN_SIZE; ++entry) {
@@ -194,15 +227,22 @@ int main(int argc, char *argv[]) {
         auto bitmask_before_lambda = [&bitmasks, scan] () {bitmasks[scan].clear();};
 
         const auto before = std::chrono::steady_clock::now();
-        scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda);
+        if (benchmarkConfig.CLEAR_CACHE) {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+        } else {
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);          
+        } 
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmasks[scan][i] == true)
             counter++;
         }
+
+        auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
+
         // counter = std::count(bitmasks[scan].cbegin(), bitmasks[scan].cend(), true);
-        print_result(duration, benchmarkConfig, counter, scans[scan].config);
+        print_result(converted_duration, benchmarkConfig, counter, scans[scan].config);
       }
 
       for (auto entry = size_t(0); entry < scans[0].config->COLUMN_SIZE; ++entry) {
