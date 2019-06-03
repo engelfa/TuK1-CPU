@@ -34,3 +34,11 @@
   # If you want to check what functionality works on your system
   make test
 ```
+
+## Run with PAPI
+
+```bash
+  PAPI=1 cmake ..
+  # or:
+  export PAPI=1  # $env:PAPI=0 on Windows
+```

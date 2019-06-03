@@ -4,7 +4,7 @@ set(PROJECT_NAME tuk_cpu)
 project(${PROJECT_NAME})
 
 # ON or OFF
-set(USE_PAPI OFF)
+set(USE_PAPI $ENV{PAPI})
 
 SET(CMAKE_C_COMPILER gcc)
 SET(CMAKE_CXX_COMPILER g++)
