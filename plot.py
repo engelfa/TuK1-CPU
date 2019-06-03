@@ -40,11 +40,11 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 2000, 'random_values': 0,
+    par = {'result_format': 0, 'run_count': 2000, 'clear_cache': 0, 'random_values': 0,
             'column_size': 200000, 'selectivity': 0.01}
     generatePlot(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
-        {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 1}],
+        {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
         'duration')
 
 
