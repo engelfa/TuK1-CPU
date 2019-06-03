@@ -19,11 +19,11 @@ enum ResultFormat {
 
 void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, std::shared_ptr<ScanConfig> scanConfig) {
   std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_sec" << std::endl;
-  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << "," 
-    << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << "," 
-    << scanConfig->SELECTIVITY << "," << counter << "," 
-    << duration/benchmarkConfig.RUN_COUNT << "," 
-    << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << "," 
+  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << ","
+    << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << ","
+    << scanConfig->SELECTIVITY << "," << counter << ","
+    << duration/benchmarkConfig.RUN_COUNT << ","
+    << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
     << (scanConfig->COLUMN_SIZE*8)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << std::endl;
 }
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
   if (argc < 6) {
     std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <random_values> <column_size> <selectivity>" << std::endl;
-    std::cout << "For example:  ./tuk_cpu.exe 0 1000 0 0 100000 0.1" << std::endl;
+    std::cout << "For example:  ./tuk_cpu 0 1000 0 0 100000 0.1" << std::endl;
     return 1;
   }
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
                                 p[i] = cacheDist(e2);
                               };
                             };
-  auto keep_cache_lambda = [] () {};                          
+  auto keep_cache_lambda = [] () {};
 
   // TODO: Multiple scans / Combine scans afterwards
   // TODO: Multicore execution
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
       std::vector<uint64_t> counters(scan_count, 0);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
-        
+
         auto counter_before_lambda = [&counters, scan] () {counters[scan] = 0;};
         auto counter_lambda = [&counters, scan] (uint64_t i) {++counters[scan];};
 
@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
         if (benchmarkConfig.CLEAR_CACHE) {
           scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
         } else {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);          
-        } 
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+        }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
 
