@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.5.1)
 set(PROJECT_NAME tuk_cpu)
 project(${PROJECT_NAME})
 
+# ON or OFF
+set(USE_PAPI OFF)
+
 SET(CMAKE_C_COMPILER gcc)
 SET(CMAKE_CXX_COMPILER g++)
 SET(CMAKE_CXX_COMPILER_LAUNCHER ccache)
@@ -12,9 +15,11 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wpedant
 
 # Add PAPI via separate cmake file
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(PAPI REQUIRED)
 
-include_directories(${PAPI_INCLUDE_DIRS})
+if(${USE_PAPI})
+	find_package(PAPI REQUIRED)
+	include_directories(${PAPI_INCLUDE_DIRS})
+endif()
 
 SET(SOURCES
 		src/main.cpp
@@ -24,4 +29,6 @@ SET(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} ${PAPI_LIBRARIES})
+if(${USE_PAPI})
+	target_link_libraries(${PROJECT_NAME} ${PAPI_LIBRARIES})
+endif()
