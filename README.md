@@ -17,7 +17,7 @@
 
 ## Setup this repo
 
-```
+```bash
   mkdir build
   cd build
   cmake ..
@@ -29,7 +29,7 @@
 Use stable 5.7 version since the High Level API somehow changed in 5.7.1.
 See: https://bitbucket.org/icl/papi/branches/compare/master%0Dstable-5.7#Lsrc/papi.hF1123
 
-```
+```bash
   git clone https://bitbucket.org/icl/papi.git -b stable-5.7
   cd papi/src
   sudo ./configure
@@ -43,7 +43,23 @@ See: https://bitbucket.org/icl/papi/branches/compare/master%0Dstable-5.7#Lsrc/pa
    sudo rm /usr/local/include/*papi*
 ```
 
-## Run with PAPI
+### Troubleshooting
+
+For the [online example](http://icl.cs.utk.edu/projects/papi/wiki/PAPITopics:Getting_Started) using PAPI_flops, I've faced the following error:
+
+```
+  PAPI_flops.c    FAILED
+  Line # 44
+  Error in PAPI_flops: Component containing event is disabled
+```
+
+Solution:
+
+```bash
+  sudo sh -c 'echo -1 >/proc/sys/kernel/perf_event_paranoid'
+```
+
+### Run CMAKE with PAPI
 
 ```bash
   PAPI=1 cmake ..
