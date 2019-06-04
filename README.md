@@ -26,13 +26,21 @@
 
 ## Setup PAPI
 
+Use stable 5.7 version since the High Level API somehow changed in 5.7.1.
+See: https://bitbucket.org/icl/papi/branches/compare/master%0Dstable-5.7#Lsrc/papi.hF1123
+
 ```
-  git clone https://bitbucket.org/icl/papi
+  git clone https://bitbucket.org/icl/papi.git -b stable-5.7
   cd papi/src
-  ./configure
+  sudo ./configure
+  sudo make
   sudo make install
   # If you want to check what functionality works on your system
   make test
+
+  # If you want to remove PAPI
+   sudo rm /usr/local/lib/libpapi*
+   sudo rm /usr/local/include/*papi*
 ```
 
 ## Run with PAPI
