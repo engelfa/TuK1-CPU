@@ -14,6 +14,8 @@ PLOTS_PATH = "./plots/"
 PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
 DEBUG = False
 
+PLOT_STYLES = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
 
 if DEBUG:
     # If there are debug logs, do not show a progress bar
@@ -40,9 +42,9 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 2000, 'clear_cache': 0, 'random_values': 0,
+    par = {'result_format': 0, 'run_count': 1000000, 'clear_cache': 0, 'random_values': 0,
             'column_size': 200000, 'selectivity': 0.01}
-    generatePlot(
+    generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
         'duration')
@@ -51,14 +53,6 @@ def execute():
 def dlog(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
-
-def frange(start, stop, step):
-    r = start
-    i = 0
-    while r <= stop:
-        yield r
-        i += 1
-        r = i * step + start
 
 
 def run(par):
@@ -83,29 +77,62 @@ def run(par):
     return results
 
 
-def generatePlot(p, yParam):
-    if(len(p) == 1):
-        xaxis = []
-        yaxis = []
-        steps = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
-        for i in tqdm(steps, total=p[0]['xMax']/p[0]['stepSize']+1, ascii=True):
-            par[p[0]['xParam']] = i
-            results = run(list(par.values()))
-            dlog(results)
-            yaxis.append(int(results[yParam]))
-            xaxis.append(i)
-        plt.plot(xaxis, yaxis)
-        plt.ylabel(yParam)
+def gather_plot_data(query_params, y_param):
+    x_axis = []
+    y_axis = []
+    parameters = range(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
+        par[query_params['xParam']] = i
+        results = run(list(par.values()))
+        dlog(results)
+        y_axis.append(int(results[y_param]))
+        x_axis.append(i)
+    return x_axis, y_axis
+
+
+def generate_plots(p, y_param):
+    if len(p) == 1:
+        x_axis, y_axis = gather_plot_data(p[0], y_param)
+
+        fixed_parameters = dict(par)
+        fixed_parameters.pop(p[0]['xParam'])
+
+        plt.plot(x_axis, y_axis)
+        plt.ylabel(y_param)
         plt.xlabel(p[0]['xParam'])
-        plt.title(str(par) + ';' + yParam + '\n', fontsize=13)
+        plt.title(str(fixed_parameters) + ';' + y_param + '\n', fontsize=13)
+
         timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + yParam
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
+        plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
+        plt.clf()
+    elif len(p) == 2:
+        parameters = range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        for count, parameter in enumerate(parameters):
+            par[p[0]['xParam']] = parameter
+            x_axis, y_axis = gather_plot_data(p[1], y_param)
+
+            plot_style = PLOT_STYLES[count % len(PLOT_STYLES)]
+            plt.plot(x_axis, y_axis, plot_style, label="{} = {}".format(p[0]['xParam'], parameter))
+
+        fixed_parameters = dict(par)
+        fixed_parameters.pop(p[0]['xParam'])
+        fixed_parameters.pop(p[1]['xParam'])
+
+        plt.ylabel(y_param)
+        plt.xlabel(p[1]['xParam'])
+        plt.legend()
+        plt.title(str(fixed_parameters), fontsize=13)
+
+        timestamp = time.strftime('%m%d-%H%M%S')
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
+
         plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
         plt.clf()
     else:
-        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+        for i in range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
             par[p[0]['xParam']] = i
-            generatePlot(p[1:], yParam)
+            generate_plots(p[1:], y_param)
 
 
 if __name__ == '__main__':
