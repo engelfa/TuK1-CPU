@@ -80,7 +80,7 @@ def run(par):
 def gather_plot_data(query_params, y_param):
     x_axis = []
     y_axis = []
-    parameters = range(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    parameters = inclusive_range(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
         par[query_params['xParam']] = i
         results = run(list(par.values()))
@@ -88,6 +88,11 @@ def gather_plot_data(query_params, y_param):
         y_axis.append(int(results[y_param]))
         x_axis.append(i)
     return x_axis, y_axis
+
+
+def inclusive_range(start, stop, step):
+    for i in range(start, stop + 1, step):
+        yield i
 
 
 def generate_plots(p, y_param):
@@ -107,7 +112,7 @@ def generate_plots(p, y_param):
         plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
         plt.clf()
     elif len(p) == 2:
-        parameters = range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
         for count, parameter in enumerate(parameters):
             par[p[0]['xParam']] = parameter
             x_axis, y_axis = gather_plot_data(p[1], y_param)
@@ -130,7 +135,7 @@ def generate_plots(p, y_param):
         plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
         plt.clf()
     else:
-        for i in range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+        for i in inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
             par[p[0]['xParam']] = i
             generate_plots(p[1:], y_param)
 
