@@ -8,6 +8,7 @@
 #include <bitset>
 
 #include "Scan.h"
+#include "papi.h"
 
 enum ResultFormat {
   COUNTER,
@@ -57,6 +58,14 @@ int main(int argc, char *argv[]) {
                             };
   auto keep_cache_lambda = [] () {};
 
+  int miss_eventset=PAPI_NULL;
+  long long count = 0;
+  PAPI_create_eventset(&miss_eventset);
+
+  PAPI_add_named_event(miss_eventset,"PAPI_BR_MSP");
+  PAPI_reset(miss_eventset);
+  PAPI_start(miss_eventset);
+
   // TODO: Multiple scans / Combine scans afterwards
   // TODO: Multicore execution
   // TODO: PMCs => Branch Prediction / Cache Misses
@@ -105,6 +114,9 @@ int main(int argc, char *argv[]) {
     }
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
+
+  PAPI_stop(miss_eventset,&count);
+  std::cout << count << std::endl;
 
   if (benchmarkConfig.CLEAR_CACHE) {
     std::cout << "- Determine Cache Clearing Duration" << std::endl;
