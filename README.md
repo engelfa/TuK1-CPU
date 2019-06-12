@@ -20,7 +20,7 @@
 ```bash
   mkdir build
   cd build
-  cmake ..
+  cmake ..  #  -G "Unix Makefiles" on Windows & Mac
   make
 ```
 
