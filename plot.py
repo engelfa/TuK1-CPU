@@ -105,12 +105,9 @@ def generate_plots(p, y_param):
         plt.plot(x_axis, y_axis)
         plt.ylabel(y_param)
         plt.xlabel(p[0]['xParam'])
-        plt.title(str(fixed_parameters) + ';' + y_param + '\n', fontsize=13)
+        plt.title(str(fixed_parameters) + '\n', fontsize=13)
 
-        timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
-        plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
-        plt.clf()
+        save_plot(y_param)
     elif len(p) == 2:
         parameters = inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
         for count, parameter in enumerate(parameters):
@@ -129,15 +126,18 @@ def generate_plots(p, y_param):
         plt.legend()
         plt.title(str(fixed_parameters), fontsize=13)
 
-        timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
-
-        plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
-        plt.clf()
+        save_plot(y_param)
     else:
         for i in inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
             par[p[0]['xParam']] = i
             generate_plots(p[1:], y_param)
+
+
+def save_plot(y_param):
+    timestamp = time.strftime('%m%d-%H%M%S')
+    filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
+    plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
+    plt.clf()
 
 
 if __name__ == '__main__':
