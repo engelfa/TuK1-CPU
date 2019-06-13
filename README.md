@@ -1,6 +1,6 @@
 # TuK1-CPU
 
-## Benchmark parameters
+## Benchmark input parameters
 
 | Parameter       | Options | Meaning                                             | Implemented |
 | --------------- | ------- | --------------------------------------------------- | ----------- |
@@ -14,6 +14,26 @@
 | distinct_values | uint_64 | number of distinct values in uniform distribution   | no          |
 | min_range       | uint_64 | min value for search range in column                | no          |
 | max_range       | uint_64 | max value for search range in column                | no          |
+
+## Benchmark output parameters
+
+| Parameter                  | Meaning                                             | Implemented |
+| -------------------------- | --------------------------------------------------- | ----------- |
+| result_format              | counter, position list, bitmask                     | yes         |
+| run_count                  | number of column scans to determine average runtime | yes         |
+| random_values              | consecutive values, random                          | yes         |
+| column_size                | column size                                         | yes         |
+| selectivity                | percentage of entries selected by scan              | yes         |
+| hits                       | matching rows                                       | yes         |
+| duration                   | nanoseconds per run                                 | yes         |
+| rows_per_sec               | scanned rows per second                             | yes         |
+| gb_per_sec                 | data scanned per second (gb)                        | yes         |
+| branch_mispredictions      | branch mispredictions                               | yes         |
+| l1_cache_misses            |                                                     | yes         |
+| l2_cache_misses            |                                                     | yes         |
+| l3_cache_misses            |                                                     | yes         |
+
+
 
 ## Setup this repo
 
