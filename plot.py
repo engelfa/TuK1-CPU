@@ -42,7 +42,7 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 1000000, 'clear_cache': 0, 'random_values': 0,
+    par = {'result_format': 0, 'run_count': 100000, 'clear_cache': 0, 'random_values': 0,
             'column_size': 200000, 'selectivity': 0.01}
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
@@ -80,7 +80,7 @@ def run(par):
 def gather_plot_data(query_params, y_param):
     x_axis = []
     y_axis = []
-    parameters = inclusive_range(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    parameters = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
         par[query_params['xParam']] = i
         results = run(list(par.values()))
@@ -90,9 +90,13 @@ def gather_plot_data(query_params, y_param):
     return x_axis, y_axis
 
 
-def inclusive_range(start, stop, step):
-    for i in range(start, stop + 1, step):
-        yield i
+def frange(start, stop, step):
+    r = start
+    i = 0
+    while r <= stop:
+        yield r
+        i += 1
+        r = i * step + start
 
 
 def generate_plots(p, y_param):
@@ -109,7 +113,8 @@ def generate_plots(p, y_param):
 
         save_plot(y_param)
     elif len(p) == 2:
-        parameters = inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+
         for count, parameter in enumerate(parameters):
             par[p[0]['xParam']] = parameter
             x_axis, y_axis = gather_plot_data(p[1], y_param)
@@ -128,7 +133,8 @@ def generate_plots(p, y_param):
 
         save_plot(y_param)
     else:
-        for i in inclusive_range(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+
             par[p[0]['xParam']] = i
             generate_plots(p[1:], y_param)
 
@@ -139,6 +145,26 @@ def save_plot(y_param):
     plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
     plt.clf()
 
+# Default colors: blue green and orange yellow
+def twin_plot(x, y1, y2, y1_label='Y1', y2_label='Y2',
+              y1_color='#037d95', y2_color='#ffa823', title='Title'):
+    ax = plt.plot(x, y1, color=y1_color)
+    fig = ax.get_figure()
+    # Make the y-axis label, ticks and tick labels match the line color.
+    ax.set_ylabel(y1_label, color=y1_color)
+    ax.tick_params('y', colors=y1_color)
+    ax.yaxis.grid(linestyle='dashed')
+
+    ax2 = ax.twinx()
+    ax2.plot(x, y2, colors=y2_color)  # orange yellow
+    ax2.set_ylabel(y2_label, colors=y2_color)
+    ax2.tick_params('y', colors=y2_color)
+
+    ax2.set_title(title)
+    # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
+
+    fig.tight_layout()
+    
 
 if __name__ == '__main__':
     execute()

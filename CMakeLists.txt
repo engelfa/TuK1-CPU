@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.5.1)
 
-set(PROJECT_NAME tuk_cpu)
+SET(PROJECT_NAME tuk_cpu)
 project(${PROJECT_NAME})
 
 # ON or OFF
-set(USE_PAPI $ENV{PAPI})
+SET(USE_PAPI $ENV{PAPI})
 
+SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_C_COMPILER gcc)
 SET(CMAKE_CXX_COMPILER g++)
 SET(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 SET(CMAKE_BUILD_TYPE Release)
-# SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wpedantic -std=c++17")
 
 # Add PAPI via separate cmake file
