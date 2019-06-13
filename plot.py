@@ -140,5 +140,26 @@ def generate_plots(p, y_param):
             generate_plots(p[1:], y_param)
 
 
+# Default colors: blue green and orange yellow
+def twin_plot(x, y1, y2, y1_label='Y1', y2_label='Y2',
+              y1_color='#037d95', y2_color='#ffa823', title='Title'):
+    ax = plt.plot(x, y1, color=y1_color)
+    fig = ax.get_figure()
+    # Make the y-axis label, ticks and tick labels match the line color.
+    ax.set_ylabel(y1_label, color=y1_color)
+    ax.tick_params('y', colors=y1_color)
+    ax.yaxis.grid(linestyle='dashed')
+
+    ax2 = ax.twinx()
+    ax2.plot(x, y2, colors=y2_color)  # orange yellow
+    ax2.set_ylabel(y2_label, colors=y2_color)
+    ax2.tick_params('y', colors=y2_color)
+
+    ax2.set_title(title)
+    # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
+
+    fig.tight_layout()
+
+
 if __name__ == '__main__':
     execute()
