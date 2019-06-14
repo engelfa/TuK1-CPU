@@ -26,7 +26,7 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
     << scanConfig->SELECTIVITY << "," << counter << ","
     << duration/benchmarkConfig.RUN_COUNT << ","
     << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
-    << (scanConfig->COLUMN_SIZE*8)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
+    << (scanConfig->COLUMN_SIZE*8/(double)1e9)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
     << papi_counts[0] << "," << papi_counts[1] << "," << papi_counts[2] << "," << papi_counts[3] << std::endl;
 
 }
@@ -46,24 +46,14 @@ void calculate_event_set() {
 int main(int argc, char *argv[]) {
 
   if (argc < 6) {
-    std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <random_values> <column_size> <selectivity>" << std::endl;
-    std::cout << "For example:  ./tuk_cpu 0 1000 0 0 100000 0.1" << std::endl;
+    std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <cache_size> <random_values> <column_size> <selectivity> <reserve_memory>" << std::endl;
+    std::cout << "For example:  ./tuk_cpu 0 1000 0 50 0 100000 0.1 0" << std::endl;
     return 1;
   }
 
   // Create random generator
   std::random_device rd;
-  std::mt19937 e2(rd());
-  const size_t bigger_than_cachesize = 10 * 1024 * 1024;
-  long p[bigger_than_cachesize] = {0};
-  uint64_t cache_clear_duration = 0;
-  std::uniform_int_distribution<uint64_t> cacheDist(0,1e12);
-  auto clear_cache_lambda = [&cacheDist, &e2, &p, &bigger_than_cachesize] () {
-                              for(auto i = 0; i < bigger_than_cachesize; ++i) {
-                                p[i] = cacheDist(e2);
-                              };
-                            };
-  auto keep_cache_lambda = [] () {};
+  std::minstd_rand e2(rd());
 
   auto event_set = PAPI_NULL;
   long long papi_counts[4] = {};
@@ -71,9 +61,9 @@ int main(int argc, char *argv[]) {
   PAPI_library_init(PAPI_VER_CURRENT);
   PAPI_create_eventset(&event_set);
   PAPI_add_named_event(event_set,"PAPI_BR_MSP");
-  PAPI_add_named_event(event_set,"PAPI_L1_TCM");
-  PAPI_add_named_event(event_set,"PAPI_L2_TCM");
-  PAPI_add_named_event(event_set,"PAPI_L3_TCM");
+  PAPI_add_named_event(event_set,"PAPI_L1_TCR");
+  PAPI_add_named_event(event_set,"PAPI_L2_TCR");
+  PAPI_add_named_event(event_set,"PAPI_L3_TCR");
   PAPI_reset(event_set);
 
   // TODO: Multiple scans / Combine scans afterwards
@@ -84,22 +74,38 @@ int main(int argc, char *argv[]) {
 
   // TODO: graph -> comparison of different runs in one diagram
   // TODO: graph -> multiple scan support > write arguments in file
-  BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]), atoi(argv[3]));
+  BenchmarkConfig benchmarkConfig(atoi(argv[1]), atoi(argv[2]), atoi(argv[3]), atoi(argv[4]));
+
+  const size_t cache_size = benchmarkConfig.CACHE_SIZE * 1024 * 1024;
+  std::vector<long> p(cache_size, 0);
+  uint64_t cache_clear_duration = 0;
+  std::uniform_int_distribution<uint64_t> cacheDist(0,1e12);
+  auto clear_cache_lambda = [&cacheDist, &e2, &p, &cache_size] () {
+                              for(auto i = 0; i < cache_size; ++i) {
+                                p[i] = cacheDist(e2);
+                              };
+                            };
+  auto keep_cache_lambda = [] () {};
 
   size_t scan_count = 1;
   std::vector<Scan> scans;
   scans.reserve(scan_count);
 
   for (auto scan = size_t(0); scan < scan_count; ++scan) {
-    ScanConfig scanConfig(atoi(argv[4]), atoi(argv[5]), atof(argv[6]));
+    ScanConfig scanConfig(atoi(argv[5]), atoi(argv[6]), atof(argv[7]), atoi(argv[8]));
 
     uint64_t min = 1, max = scanConfig.COLUMN_SIZE;
     std::uniform_int_distribution<uint64_t> dist(min,max);
 
     std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;
+    const auto initialize_before = std::chrono::steady_clock::now();
     std::vector<uint64_t> input(scanConfig.COLUMN_SIZE);
+    const auto initialize_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+        (std::chrono::steady_clock::now() - initialize_before);
+    std::cout << "- Took " << initialize_duration.count()/(double)1e6 << " ms" << std::endl;
 
     std::cout << "- Generate Column Data for Scan " << scan + 1 << std::endl;
+    const auto generate_before = std::chrono::steady_clock::now();
     // Draw {col_size} times from a normal distribution with {distinct_val} steps
     if (scanConfig.RANDOM_VALUES) {
       auto values_for_selectivity = scanConfig.COLUMN_SIZE*scanConfig.SELECTIVITY;
@@ -123,6 +129,9 @@ int main(int argc, char *argv[]) {
         }
       }
     }
+    const auto generate_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+        (std::chrono::steady_clock::now() - generate_before);
+    std::cout << "- Took " << generate_duration.count()/(double)1e6 << " ms" << std::endl;
     scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
   }
 
@@ -130,13 +139,14 @@ int main(int argc, char *argv[]) {
     std::cout << "- Determine Cache Clearing Duration" << std::endl;
     const auto before = std::chrono::steady_clock::now();
     for (auto i = 0; i < benchmarkConfig.RUN_COUNT/10; ++i) {
-      for(auto i = 0; i < bigger_than_cachesize; ++i) {
+      for(auto i = 0; i < cache_size; ++i) {
          p[i] = cacheDist(e2);
       }
     }
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
         (std::chrono::steady_clock::now() - before);
     cache_clear_duration = duration.count() / (benchmarkConfig.RUN_COUNT/10);
+    std::cout << "- Took " << duration.count()/(double)1e6 << " ms" << std::endl;
   }
 
   std::cout << "- Start Benchmark" << std::endl;
@@ -174,7 +184,10 @@ int main(int argc, char *argv[]) {
       std::vector<std::vector<uint64_t>> positionLists(scan_count);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
-        positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
+        if (scans[scan].config->RESERVE_MEMORY) {
+          std::cout << "reserve" << std::endl;
+          positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
+        }
         auto positionList_lambda = [&positionLists, scan] (uint64_t i) {positionLists[scan].push_back(i);};
         auto positionList_before_lambda = [&positionLists, scan] () {positionLists[scan].clear();};
         uint64_t counter = 0;
