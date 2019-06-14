@@ -19,11 +19,19 @@ enum ResultFormat {
 };
 
 void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, const std::shared_ptr<ScanConfig> scanConfig, long long *papi_counts) {
-  std::cout << "result_format,run_count,random_values,column_size,selectivity,hits,duration,rows_per_sec,gb_per_sec,branch_mispredictions,"
+  std::cout << "result_format,run_count,clear_cache,random_values,column_size,selectivity,"
+                "reserve_memory,use_if,hits,duration,rows_per_sec,gb_per_sec,branch_mispredictions,"
                 "l1_cache_misses,l2_cache_misses,l3_cache_misses" << std::endl;
-  std::cout << benchmarkConfig.RESULT_FORMAT << "," << benchmarkConfig.RUN_COUNT << ","
-    << scanConfig->RANDOM_VALUES << "," << scanConfig->COLUMN_SIZE << ","
-    << scanConfig->SELECTIVITY << "," << counter << ","
+  std::cout << benchmarkConfig.RESULT_FORMAT<< ","
+    << benchmarkConfig.RUN_COUNT << ","
+    << benchmarkConfig.CLEAR_CACHE << ","
+    << benchmarkConfig.CACHE_SIZE << ","
+    << scanConfig->RANDOM_VALUES << ","
+    << scanConfig->COLUMN_SIZE << ","
+    << scanConfig->SELECTIVITY << ","
+    << scanConfig->RESERVE_MEMORY << ","
+    << scanConfig->USE_IF << ","
+    << counter << ","
     << duration/benchmarkConfig.RUN_COUNT << ","
     << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
     << (scanConfig->COLUMN_SIZE*8/(double)1e9)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
@@ -46,8 +54,8 @@ void calculate_event_set() {
 int main(int argc, char *argv[]) {
 
   if (argc < 6) {
-    std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <cache_size> <random_values> <column_size> <selectivity> <reserve_memory>" << std::endl;
-    std::cout << "For example:  ./tuk_cpu 0 1000 0 50 0 100000 0.1 0" << std::endl;
+    std::cout << "Usage: ./... <result_format> <run_count> <clear_cache> <cache_size> <random_values> <column_size> <selectivity> <reserve_memory> <use_if>" << std::endl;
+    std::cout << "For example:  ./tuk_cpu 0 1000 0 10 0 100000 0.1 0 0" << std::endl;
     return 1;
   }
 
@@ -92,7 +100,7 @@ int main(int argc, char *argv[]) {
   scans.reserve(scan_count);
 
   for (auto scan = size_t(0); scan < scan_count; ++scan) {
-    ScanConfig scanConfig(atoi(argv[5]), atoi(argv[6]), atof(argv[7]), atoi(argv[8]));
+    ScanConfig scanConfig(atoi(argv[5]), atoi(argv[6]), atof(argv[7]), atoi(argv[8]), atoi(argv[9]));
 
     uint64_t min = 1, max = scanConfig.COLUMN_SIZE;
     std::uniform_int_distribution<uint64_t> dist(min,max);
@@ -185,7 +193,6 @@ int main(int argc, char *argv[]) {
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         if (scans[scan].config->RESERVE_MEMORY) {
-          std::cout << "reserve" << std::endl;
           positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
         }
         auto positionList_lambda = [&positionLists, scan] (uint64_t i) {positionLists[scan].push_back(i);};
@@ -259,14 +266,23 @@ int main(int argc, char *argv[]) {
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         // Counter is only last run
         auto bitmask_lambda = [&bitmasks, scan] (uint64_t i) {bitmasks[scan][i] = true;};
+        auto bitmask_lambda_without_if = [&bitmasks, &scans, &scan] (uint64_t i) {bitmasks[scan][i] = (*scans[scan].input_column)[i] == 0;};
         auto bitmask_before_lambda = [&bitmasks, scan] () {bitmasks[scan].clear();};
 
         PAPI_start(event_set);
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+          if (scans[scan].config->USE_IF) {
+            scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+          } else {
+            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda, clear_cache_lambda);
+          }
         } else {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+          if (scans[scan].config->USE_IF) {
+            scans[scan].execute(benchmarkConfig.RUN_COUNT, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+          } else {
+            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda, keep_cache_lambda);
+          }
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
