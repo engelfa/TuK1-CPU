@@ -72,8 +72,8 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 100000, 'clear_cache': 0, 'random_values': 0,
-            'column_size': 200000, 'selectivity': 0.01}
+    par = {'result_format': 0, 'run_count': 2000, 'clear_cache': 0, 'cache_size': 10, 'random_values': 0,
+                'column_size': 200000, 'selectivity': 0.01, 'reserve_memory': 0, 'use_if': 0}
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
@@ -133,12 +133,9 @@ def generate_plots(p, y_param):
         plt.plot(x_axis, y_axis)
         plt.ylabel(y_param)
         plt.xlabel(p[0]['xParam'])
-        plt.title(str(fixed_parameters) + ';' + y_param + '\n', fontsize=13)
+        plt.title(str(fixed_parameters) + '\n', fontsize=13)
 
-        timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
-        plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
-        plt.clf()
+        save_plot(y_param)
     elif len(p) == 2:
         parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
 
@@ -158,17 +155,19 @@ def generate_plots(p, y_param):
         plt.legend()
         plt.title(str(fixed_parameters), fontsize=13)
 
-        timestamp = time.strftime('%m%d-%H%M%S')
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
-
-        plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
-        plt.clf()
+        save_plot(y_param)
     else:
         for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
 
             par[p[0]['xParam']] = i
             generate_plots(p[1:], y_param)
 
+
+def save_plot(y_param):
+    timestamp = time.strftime('%m%d-%H%M%S')
+    filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
+    plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
+    plt.clf()
 
 # Default colors: blue green and orange yellow
 def twin_plot(x, y1, y2, y1_label='Y1', y2_label='Y2',
@@ -189,7 +188,7 @@ def twin_plot(x, y1, y2, y1_label='Y1', y2_label='Y2',
     # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
 
     fig.tight_layout()
-
+    
 
 if __name__ == '__main__':
     execute()

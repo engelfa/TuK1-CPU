@@ -1,5 +1,7 @@
 # TuK1-CPU
 
+Presentation Slides: https://bit.ly/2MLJlC2
+
 ## Benchmark input parameters
 
 | Parameter       | Options | Meaning                                             | Implemented |
