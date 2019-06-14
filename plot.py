@@ -27,9 +27,39 @@ style.use('ggplot')
 
 par = None
 
+def run_command(cmd_call):
+    proc = subprocess.Popen(
+        cmd_call,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE)
+    so, se = proc.communicate()
+    return so.decode("utf-8"), se.decode("utf-8")
+
+
+def get_cache_size(unit=''):
+    # Read out all cache sizes (L1d, L1i, L2, L3, L4)
+    cmd_list_sizes = "getconf -a | grep CACHE_SIZE | sed -r 's/\S+\s+//'"
+    response, std_err = run_command(cmd_list_sizes)
+    # And sum them up
+    cache_size = float(sum([int(x) for x in response.split("\n") if len(x)]))
+    # Optional: get in KiB or MiB
+    if unit.lower() in ('kb', 'kib', 'mb', 'mib'):
+        cache_size = cache_size / 1028
+    if unit.lower() in ('mb', 'mib'):
+        cache_size = cache_size / 1028
+    return round(cache_size, 2)
+
+
+def get_memory_bandwidth():
+    pass
+
 
 def execute():
     global par
+
+    print('[INFO] Overall cache size [Bit]: ', get_cache_size())
 
     # If defined, remove and recreate the plots directory
     if len(sys.argv) == 2:
@@ -57,17 +87,10 @@ def dlog(*args, **kwargs):
 
 def run(par):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    proc = subprocess.Popen(
-        cmd_call,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        stdin=subprocess.PIPE)
-    so, se = proc.communicate()
-    so = so.decode("utf-8")
+    so, se = run_command(cmd_call)
     if len(so) == 0:
         print(f'Calling `{cmd_call}` failed')
-        print('Error response: ', se.decode("utf-8"))
+        print('Error response: ', se)
         raise ValueError('No response from subprocess!')
     dlog(so.split('\n'))
     so = list(filter(lambda x: x != '' and x[0] != '-', so.split('\n')))
@@ -82,6 +105,7 @@ def gather_plot_data(query_params, y_param):
     y_axis = []
     parameters = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
+        print('[INFO] Allocated Memory: ', query_params['column_size'], query_params['result_format'])
         par[query_params['xParam']] = i
         results = run(list(par.values()))
         dlog(results)

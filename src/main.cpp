@@ -174,6 +174,8 @@ int main(int argc, char *argv[]) {
       std::vector<std::vector<uint64_t>> positionLists(scan_count);
 
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
+        // TODO: Try out without reserve()
+        // Expectation: Bursts when the vector is expanded
         positionLists[scan].reserve(scans[scan].config->COLUMN_SIZE);
         auto positionList_lambda = [&positionLists, scan] (uint64_t i) {positionLists[scan].push_back(i);};
         auto positionList_before_lambda = [&positionLists, scan] () {positionLists[scan].clear();};
