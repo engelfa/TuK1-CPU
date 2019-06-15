@@ -105,7 +105,7 @@ def gather_plot_data(query_params, y_param):
     y_axis = []
     parameters = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
-        print('[INFO] Allocated Memory: ', query_params['column_size'], query_params['result_format'])
+        print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
         par[query_params['xParam']] = i
         results = run(list(par.values()))
         dlog(results)
