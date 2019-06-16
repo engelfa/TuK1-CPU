@@ -8,7 +8,7 @@ import matplotlib.style as style
 import sys
 from tqdm import tqdm
 
-from proc_utils import *
+import proc_utils as proc
 
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
@@ -28,14 +28,16 @@ style.use('ggplot')
 
 par = None
 
-def get_memory_bandwidth():
-    pass
+# Stored globally to share lineplots in one figure
+fig, ax = None, None
 
 
 def execute():
     global par
 
-    print('[INFO] Overall cache size [Bit]: ', get_cache_size())
+    print('[INFO] Overall cache size [Bit]: ', proc.get_cache_size())
+    print('[INFO] CPU Core Temperatures [C]: ', ', '.join(
+        map(proc.get_cpu_core_temperatures(), str)))
 
     # If defined, remove and recreate the plots directory
     if len(sys.argv) == 2:
@@ -53,7 +55,7 @@ def execute():
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
-        'duration','selectivity')
+        'l1_cache_misses', 'selectivity')
 
 
 def dlog(*args, **kwargs):
@@ -63,7 +65,7 @@ def dlog(*args, **kwargs):
 
 def run(par):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    so, se = run_command(cmd_call)
+    so, se = proc.run_command(cmd_call)
     if len(so) == 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
@@ -147,8 +149,11 @@ def save_plot(y_param1, y_param2=None):
     plt.clf()
 
 
-fig, ax = plt.subplots()
 def create_plot(x, x_label, plot_style, y1, y1_label, title, fontsize=13, y2=None, y2_label=None, label=None, y1_color='#037d95', y2_color='#ffa823'):
+    global fig, ax
+    # Use same figure (and axes) if already created
+    if fig == None:
+        fig, ax = plt.subplots()
     ax.plot(x, y1, plot_style, label=label)
 
     ax.set_xlabel(x_label)

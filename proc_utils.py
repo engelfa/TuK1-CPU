@@ -13,6 +13,10 @@ def run_command(cmd_call):
     return so.decode("utf-8"), se.decode("utf-8")
 
 
+def get_memory_bandwidth():
+    raise NotImplementedError()
+
+
 def get_cache_size(unit=''):
     # Read out all cache sizes (L1d, L1i, L2, L3, L4)
     cmd_list_sizes = "getconf -a | grep CACHE_SIZE | sed -r 's/\S+\s+//'"
