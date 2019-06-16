@@ -28,7 +28,6 @@ style.use('ggplot')
 
 par = None
 
-
 def get_memory_bandwidth():
     pass
 
@@ -54,7 +53,7 @@ def execute():
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
-        'duration')
+        'duration','selectivity')
 
 
 def dlog(*args, **kwargs):
@@ -77,19 +76,22 @@ def run(par):
     return results
 
 
-def gather_plot_data(query_params, y_param):
+def gather_plot_data(query_params, y_param1, y_param2=None):
     x_axis = []
-    y_axis = []
+    y_axis1 = []
+    y_axis2 = []
     parameters = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
-        print('[INFO] Allocated Memory: ', query_params['column_size'], query_params['result_format'])
+        #print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
         par[query_params['xParam']] = i
         results = run(list(par.values()))
         dlog(results)
-        y_axis.append(int(results[y_param]))
         x_axis.append(i)
-    return x_axis, y_axis
+        y_axis1.append(float(results[y_param1]))
+        if(y_param2):
+            y_axis2.append(float(results[y_param2]))
 
+    return x_axis, y_axis1, y_axis2
 
 def frange(start, stop, step):
     r = start
@@ -100,69 +102,64 @@ def frange(start, stop, step):
         r = i * step + start
 
 
-def generate_plots(p, y_param):
+def generate_plots(p, y_param1, y_param2=None):
     if len(p) == 1:
-        x_axis, y_axis = gather_plot_data(p[0], y_param)
+        x_axis, y_axis1, y_axis2 = gather_plot_data(p[0], y_param1, y_param2)
 
         fixed_parameters = dict(par)
         fixed_parameters.pop(p[0]['xParam'])
 
-        plt.plot(x_axis, y_axis)
-        plt.ylabel(y_param)
-        plt.xlabel(p[0]['xParam'])
-        plt.title(str(fixed_parameters) + '\n', fontsize=13)
+        create_plot(x_axis, p[0]['xParam'], 'b', y_axis1, y_param1, str(fixed_parameters) + '\n', 13, y_axis2, y_param2, None)
 
-        save_plot(y_param)
+        save_plot(y_param1, y_param2)
     elif len(p) == 2:
         parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
 
         for count, parameter in enumerate(parameters):
             par[p[0]['xParam']] = parameter
-            x_axis, y_axis = gather_plot_data(p[1], y_param)
+            x_axis, y_axis1, y_axis2 = gather_plot_data(p[1], y_param1, y_param2)
 
             plot_style = PLOT_STYLES[count % len(PLOT_STYLES)]
-            plt.plot(x_axis, y_axis, plot_style, label="{} = {}".format(p[0]['xParam'], parameter))
 
-        fixed_parameters = dict(par)
-        fixed_parameters.pop(p[0]['xParam'])
-        fixed_parameters.pop(p[1]['xParam'])
+            fixed_parameters = dict(par)
+            fixed_parameters.pop(p[0]['xParam'])
+            fixed_parameters.pop(p[1]['xParam'])
 
-        plt.ylabel(y_param)
-        plt.xlabel(p[1]['xParam'])
-        plt.legend()
-        plt.title(str(fixed_parameters), fontsize=13)
+            label="{} = {}".format(p[0]['xParam'], parameter)
+            create_plot(x_axis, p[1]['xParam'], plot_style, y_axis1, y_param1, str(fixed_parameters), 13, y_axis2, y_param2, label)
 
-        save_plot(y_param)
+        ax.legend()
+        save_plot(y_param1, y_param2)
     else:
         for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
 
             par[p[0]['xParam']] = i
-            generate_plots(p[1:], y_param)
+            generate_plots(p[1:], y_param1, y_param2)
 
 
-def save_plot(y_param):
+def save_plot(y_param1, y_param2=None):
     timestamp = time.strftime('%m%d-%H%M%S')
-    filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param
+    if not y_param2:
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param1
+    else:
+        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param1 + y_param2
     plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
     plt.clf()
 
-# Default colors: blue green and orange yellow
-def twin_plot(x, y1, y2, y1_label='Y1', y2_label='Y2',
-              y1_color='#037d95', y2_color='#ffa823', title='Title'):
-    ax = plt.plot(x, y1, color=y1_color)
-    fig = ax.get_figure()
-    # Make the y-axis label, ticks and tick labels match the line color.
+
+fig, ax = plt.subplots()
+def create_plot(x, x_label, plot_style, y1, y1_label, title, fontsize=13, y2=None, y2_label=None, label=None, y1_color='#037d95', y2_color='#ffa823'):
+    ax.plot(x, y1, plot_style, label=label)
+
+    ax.set_xlabel(x_label)
     ax.set_ylabel(y1_label, color=y1_color)
-    ax.tick_params('y', colors=y1_color)
-    ax.yaxis.grid(linestyle='dashed')
+    plt.tick_params('y', color=y1_color)
 
-    ax2 = ax.twinx()
-    ax2.plot(x, y2, colors=y2_color)  # orange yellow
-    ax2.set_ylabel(y2_label, colors=y2_color)
-    ax2.tick_params('y', colors=y2_color)
-
-    ax2.set_title(title)
-    # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
+    if y2:
+        ax2 = ax.twinx()
+        ax2.plot(x, y2, color=y2_color)  # orange yellow
+        ax2.set_ylabel(y2_label, color=y2_color)
+        ax2.tick_params('y', color=y2_color)
 
     fig.tight_layout()
 
