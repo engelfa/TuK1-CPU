@@ -37,7 +37,7 @@ def execute():
 
     print('[INFO] Overall cache size [Bit]: ', proc.get_cache_size())
     print('[INFO] CPU Core Temperatures [C]: ', ', '.join(
-        map(proc.get_cpu_core_temperatures(), str)))
+        map(str, proc.get_cpu_core_temperatures())))
 
     # If defined, remove and recreate the plots directory
     if len(sys.argv) == 2:
@@ -51,11 +51,11 @@ def execute():
 
     # set default values
     par = {'result_format': 0, 'run_count': 2000, 'clear_cache': 0, 'cache_size': 10, 'random_values': 0,
-                'column_size': 200000, 'selectivity': 0.01, 'reserve_memory': 0, 'use_if': 0}
+           'column_size': 200000, 'selectivity': 0.01, 'reserve_memory': 0, 'use_if': 0}
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
-        {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
-        'l1_cache_misses', 'selectivity')
+         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
+        'duration', 'selectivity')
 
 
 def dlog(*args, **kwargs):

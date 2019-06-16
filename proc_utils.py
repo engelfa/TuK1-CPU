@@ -32,4 +32,7 @@ def get_cache_size(unit=''):
 
 
 def get_cpu_core_temperatures():
-    return [x.current for x in psutil.sensors_temperatures()['coretemp']]
+    try:
+        return [x.current for x in psutil.sensors_temperatures()['coretemp']]
+    except AttributeError:
+        return ['Not available']
