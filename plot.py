@@ -92,16 +92,12 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
         y_axis1.append(float(results[y_param1]))
         if(y_param2):
             y_axis2.append(float(results[y_param2]))
-
     return x_axis, y_axis1, y_axis2
 
+
+# Same as range including stop values
 def frange(start, stop, step):
-    r = start
-    i = 0
-    while r <= stop:
-        yield r
-        i += 1
-        r = i * step + start
+    return range(start, stop+1, step)
 
 
 def generate_plots(p, y_param1, y_param2=None):
