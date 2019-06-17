@@ -52,13 +52,40 @@ def execute():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # set default values
-    par = {'result_format': 0, 'run_count': 2000, 'clear_cache': 0, 'cache_size': 10, 'random_values': 0,
-           'column_size': 200000, 'selectivity': 0.01, 'reserve_memory': 0, 'use_if': 0}
+    par = {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
+           'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0}
     generate_plots(
-        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1},
-         {'xParam': 'column_size', 'xMin': 0, 'xMax': 1000, 'stepSize': 10}],
-        'duration', 'selectivity')
-
+        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+         {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
+        'gb_per_sec', 'l1_cache_misses')
+    generate_plots(
+        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+         {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
+        'gb_per_sec', 'l2_cache_misses')
+    generate_plots(
+        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+         {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
+        'gb_per_sec', 'l3_cache_misses')
+    generate_plots(
+    [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+     {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': .1}],
+    'gb_per_sec', 'branch_mispredictions')
+    par = {'result_format': 3, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
+           'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0}
+    generate_plots(
+        [{'xParam': 'use_if', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
+         {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': .1}],
+        'gb_per_sec', 'branch_mispredictions')
+    par = {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
+           'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0}
+    generate_plots(
+        [{'xParam': 'reserve_memory', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
+         {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
+        'gb_per_sec', 'l1_cache_misses')
+    generate_plots(
+        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+         {'xParam': 'random_values', 'xMin': 0, 'xMax': 1, 'stepSize': 1}],
+        'gb_per_sec', 'l1_cache_misses')
 
 def dlog(*args, **kwargs):
     if DEBUG:
@@ -83,7 +110,7 @@ def run(par):
 
 def gather_plot_data(query_params, y_param1, y_param2=None):
     # Parameters
-    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    x_axis = list(frange(query_params['xMin'], query_params['xMax'], query_params['stepSize']))
     y_axis1 = []
     y_axis2 = []
     for x_val in tqdm(x_axis, ascii=True):
@@ -101,10 +128,14 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     return x_axis, y_axis1, y_axis2
 
 
-# Same as range including stop values
+# Allows floats in range
 def frange(start, stop, step):
-    return range(start, stop+1, step)
-
+    r = start
+    i = 0
+    while r <= stop:
+        yield r
+        i += 1
+        r = i * step + start
 
 def generate_plots(p, y_param1, y_param2=None):
     if len(p) == 1:
@@ -123,7 +154,7 @@ def generate_plots(p, y_param1, y_param2=None):
             create_plot(x_axis, p[1]['xParam'], y_axis1, y_param1, ax=ax, y1_color=COLORS[count], label=label)
         save_plot(fig, p, y_param1)
     elif len(p) == 2:
-        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = list(frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']))
         assert len(parameters) <= 5, 'I do not want to create more than five plots in one graphic'
         figsize = (FIGSIZE[0], FIGSIZE[1] * len(parameters))
         fig, axes = plt.subplots(len(parameters), figsize=figsize)

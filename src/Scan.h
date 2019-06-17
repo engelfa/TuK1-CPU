@@ -3,9 +3,11 @@
 #include "ScanConfig.h"
 #include "BenchmarkConfig.h"
 
+using INT_COLUMN = uint16_t;
+
 class Scan {
   public:
-    Scan(std::shared_ptr<ScanConfig> conf, std::shared_ptr<std::vector<uint64_t>> input) : config(conf), input_column(input) {}
+    Scan(std::shared_ptr<ScanConfig> conf, std::shared_ptr<std::vector<INT_COLUMN>> input) : config(conf), input_column(input) {}
     ~Scan() = default;
 
     template<typename T, typename U, typename V>
@@ -41,5 +43,5 @@ class Scan {
     }
 
   std::shared_ptr<ScanConfig> config;
-  std::shared_ptr<std::vector<uint64_t>> input_column;
+  std::shared_ptr<std::vector<INT_COLUMN>> input_column;
 };
