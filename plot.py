@@ -79,16 +79,15 @@ def run(par):
 
 
 def gather_plot_data(query_params, y_param1, y_param2=None):
-    x_axis = []
+    # Parameters
+    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     y_axis1 = []
     y_axis2 = []
-    parameters = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
-    for i in tqdm(parameters, total=query_params['xMax'] / query_params['stepSize'] + 1, ascii=True):
-        #print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
-        par[query_params['xParam']] = i
+    for x_val in tqdm(x_axis, ascii=True):
+        # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
+        par[query_params['xParam']] = x_val
         results = run(list(par.values()))
         dlog(results)
-        x_axis.append(i)
         y_axis1.append(float(results[y_param1]))
         if(y_param2):
             y_axis2.append(float(results[y_param2]))
