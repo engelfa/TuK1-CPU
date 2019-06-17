@@ -10,13 +10,13 @@ from tqdm import tqdm
 
 import proc_utils as proc
 
+DEBUG = False
+
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
 PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
-DEBUG = False
-
-PLOT_STYLES = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-
+# PLOT_FORMAT = "pdf"  # gives HQ plots
+FIGSIZE = (7, 5)
 
 if DEBUG:
     # If there are debug logs, do not show a progress bar
@@ -27,9 +27,6 @@ style.use('seaborn-poster')
 style.use('ggplot')
 
 par = None
-
-# Stored globally to share lineplots in one figure
-fig, ax = None, None
 
 
 def execute():
@@ -66,6 +63,7 @@ def dlog(*args, **kwargs):
 def run(par):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
     so, se = proc.run_command(cmd_call)
+    # print(so)
     if len(so) == 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
@@ -87,10 +85,14 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
         # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
         par[query_params['xParam']] = x_val
         results = run(list(par.values()))
+        core_temps = proc.get_cpu_core_temperatures()
+        for i in range(len(core_temps)):
+            results[f'cpu_temp_{i}'] = core_temps[i]
         dlog(results)
         y_axis1.append(float(results[y_param1]))
         if(y_param2):
             y_axis2.append(float(results[y_param2]))
+    # print(x_axis, y_axis1)
     return x_axis, y_axis1, y_axis2
 
 
@@ -102,66 +104,56 @@ def frange(start, stop, step):
 def generate_plots(p, y_param1, y_param2=None):
     if len(p) == 1:
         x_axis, y_axis1, y_axis2 = gather_plot_data(p[0], y_param1, y_param2)
-
-        fixed_parameters = dict(par)
-        fixed_parameters.pop(p[0]['xParam'])
-
-        create_plot(x_axis, p[0]['xParam'], 'b', y_axis1, y_param1, str(fixed_parameters) + '\n', 13, y_axis2, y_param2, None)
-
-        save_plot(y_param1, y_param2)
+        fig, ax = plt.subplots(figsize=FIGSIZE)
+        create_plot(x_axis, p[0]['xParam'], y_axis1, y_param1, y_axis2, y_param2, ax=ax)
+        save_plot(fig, p, y_param1, y_param2)
     elif len(p) == 2:
         parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        assert len(parameters) <= 5, 'I do not want to create more than five plots in one graphic'
+        figsize = (FIGSIZE[0], FIGSIZE[1] * len(parameters))
+        fig, axes = plt.subplots(len(parameters), figsize=figsize)
 
         for count, parameter in enumerate(parameters):
             par[p[0]['xParam']] = parameter
             x_axis, y_axis1, y_axis2 = gather_plot_data(p[1], y_param1, y_param2)
-
-            plot_style = PLOT_STYLES[count % len(PLOT_STYLES)]
-
-            fixed_parameters = dict(par)
-            fixed_parameters.pop(p[0]['xParam'])
-            fixed_parameters.pop(p[1]['xParam'])
-
-            label="{} = {}".format(p[0]['xParam'], parameter)
-            create_plot(x_axis, p[1]['xParam'], plot_style, y_axis1, y_param1, str(fixed_parameters), 13, y_axis2, y_param2, label)
-
-        ax.legend()
-        save_plot(y_param1, y_param2)
+            # Not all params are shown since they exceed the plot size by far (instead see filename)
+            title = "{} = {}".format(p[0]['xParam'], parameter)
+            create_plot(x_axis, p[1]['xParam'], y_axis1, y_param1, y_axis2, y_param2, title, ax=axes[count])
+        save_plot(fig, p, y_param1, y_param2)
     else:
+        # Recursively call ths function (creating multiple files)
         for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
-
             par[p[0]['xParam']] = i
             generate_plots(p[1:], y_param1, y_param2)
 
 
-def save_plot(y_param1, y_param2=None):
-    timestamp = time.strftime('%m%d-%H%M%S')
-    if not y_param2:
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param1
-    else:
-        filename = '-'.join([f'{k}-{v}' for k, v in par.items()]) + ';' + y_param1 + y_param2
-    plt.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
-    plt.clf()
-
-
-def create_plot(x, x_label, plot_style, y1, y1_label, title, fontsize=13, y2=None, y2_label=None, label=None, y1_color='#037d95', y2_color='#ffa823'):
-    global fig, ax
-    # Use same figure (and axes) if already created
-    if fig == None:
-        fig, ax = plt.subplots()
-    ax.plot(x, y1, plot_style, label=label)
-
+def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
+                label=None, y1_color='#037d95', y2_color='#ffa823', ax=None):
+    ax.plot(x, y1, color=y1_color)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y1_label, color=y1_color)
     plt.tick_params('y', color=y1_color)
-
     if y2:
         ax2 = ax.twinx()
         ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.set_ylabel(y2_label, color=y2_color)
         ax2.tick_params('y', color=y2_color)
+    ax.set_title(title)
 
+
+def save_plot(fig, p, y_param1, y_param2=None):
+    fixed_parameters = dict(par)
+    for variable_param in p:
+        fixed_parameters.pop(variable_param['xParam'])
+    timestamp = time.strftime('%m%d-%H%M%S')
+    filename = '-'.join([f'{k}-{v}' for k, v in fixed_parameters.items()]) + ';' + y_param1
+    if y_param2:
+        filename += y_param2
     fig.tight_layout()
+    fig.savefig(f'{PLOTS_PATH}{timestamp}-{filename}.{PLOT_FORMAT}')
+    # Vanish plots
+    plt.close()
+    fig = None
 
 
 if __name__ == '__main__':
