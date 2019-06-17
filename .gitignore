@@ -5,7 +5,6 @@ cmake-build-debug/
 build/
 plots/
 venv/
-scripts/
 
 papi/
 jupyter.logs
