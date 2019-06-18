@@ -6,11 +6,8 @@
 #include <memory>
 #include <algorithm>
 #include <bitset>
-<<<<<<< HEAD
 #include <thread>
-=======
 #include <limits>
->>>>>>> dd9eb32074e766cc7282eaa14cb6ab1f12fa1547
 
 #include "Scan.h"
 #include "papi.h"
