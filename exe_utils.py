@@ -112,7 +112,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
 def single_run(local_par, x_var, x_value, y_param1, y_param2, affinity):
     pid = os.getpid()
     print(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    os.system(f'taskset -p {affinity} {pid}')
+    os.system(f'taskset -cp {affinity} {pid}')
     os.system(f'taskset -cp {pid}')
     local_par[x_var] = x_value
     results = run(list(local_par.values()))
