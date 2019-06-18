@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
   std::cout << "- Took " << papi_duration.count()/(double)1e6 << " ms" << std::endl;
 
   unsigned available_num_cpus = std::thread::hardware_concurrency();
-  std::cout << "Available CPUs: " << available_num_cpus << std::endl;
+  std::cout << "- Available CPUs: " << available_num_cpus << std::endl;
 
   // TODO: Multiple scans / Combine scans afterwards
   // TODO: Multicore execution
