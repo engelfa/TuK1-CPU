@@ -8,3 +8,4 @@ venv/
 
 papi/
 jupyter.logs
+.rcforssh
