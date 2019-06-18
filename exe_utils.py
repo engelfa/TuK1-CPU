@@ -16,7 +16,7 @@ import proc_utils as proc
 DEBUG = False
 
 CONCURRENCY = 1  # Simultaneously running jobs
-USE_THREADING = True  # or use multiprocessing
+USE_THREADING = False  # or use multiprocessing
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
 PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
