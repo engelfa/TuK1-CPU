@@ -6,7 +6,11 @@
 #include <memory>
 #include <algorithm>
 #include <bitset>
+<<<<<<< HEAD
 #include <thread>
+=======
+#include <limits>
+>>>>>>> dd9eb32074e766cc7282eaa14cb6ab1f12fa1547
 
 #include "Scan.h"
 #include "papi.h"
@@ -20,7 +24,7 @@ enum ResultFormat {
 };
 
 void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, const std::shared_ptr<ScanConfig> scanConfig, long long *papi_counts) {
-  std::cout << "result_format,run_count,clear_cache,random_values,column_size,selectivity,"
+  std::cout << "result_format,run_count,clear_cache,cache_size,random_values,column_size,selectivity,"
                 "reserve_memory,use_if,hits,duration,rows_per_sec,gb_per_sec,branch_mispredictions,"
                 "l1_cache_misses,l2_cache_misses,l3_cache_misses" << std::endl;
   std::cout << benchmarkConfig.RESULT_FORMAT<< ","
@@ -35,7 +39,7 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
     << counter << ","
     << duration/benchmarkConfig.RUN_COUNT << ","
     << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
-    << (scanConfig->COLUMN_SIZE*8/(double)1e9)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
+    << (scanConfig->COLUMN_SIZE*2/(double)1e9)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
     << papi_counts[0] << "," << papi_counts[1] << "," << papi_counts[2] << "," << papi_counts[3] << std::endl;
 
 }
@@ -67,6 +71,8 @@ int main(int argc, char *argv[]) {
   auto event_set = PAPI_NULL;
   long long papi_counts[4] = {};
 
+  std::cout << "- Initialize PAPI library" << std::endl;
+  const auto papi_before = std::chrono::steady_clock::now();
   PAPI_library_init(PAPI_VER_CURRENT);
   PAPI_create_eventset(&event_set);
   PAPI_add_named_event(event_set,"PAPI_BR_MSP");
@@ -74,6 +80,9 @@ int main(int argc, char *argv[]) {
   PAPI_add_named_event(event_set,"PAPI_L2_TCR");
   PAPI_add_named_event(event_set,"PAPI_L3_TCR");
   PAPI_reset(event_set);
+  const auto papi_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::steady_clock::now() - papi_before);
+  std::cout << "- Took " << papi_duration.count()/(double)1e6 << " ms" << std::endl;
 
   unsigned available_num_cpus = std::thread::hardware_concurrency();
   std::cout << "Available CPUs: " << available_num_cpus << std::endl;
@@ -91,7 +100,7 @@ int main(int argc, char *argv[]) {
   const size_t cache_size = benchmarkConfig.CACHE_SIZE * 1024 * 1024;
   std::vector<long> p(cache_size, 0);
   uint64_t cache_clear_duration = 0;
-  std::uniform_int_distribution<uint64_t> cacheDist(0,1e12);
+  std::uniform_int_distribution<INT_COLUMN> cacheDist(0,std::numeric_limits<INT_COLUMN>::max());
   auto clear_cache_lambda = [&cacheDist, &e2, &p, &cache_size] () {
                               for(auto i = 0; i < cache_size; ++i) {
                                 p[i] = cacheDist(e2);
@@ -106,12 +115,12 @@ int main(int argc, char *argv[]) {
   for (auto scan = size_t(0); scan < scan_count; ++scan) {
     ScanConfig scanConfig(atoi(argv[5]), atoi(argv[6]), atof(argv[7]), atoi(argv[8]), atoi(argv[9]));
 
-    uint64_t min = 1, max = scanConfig.COLUMN_SIZE;
-    std::uniform_int_distribution<uint64_t> dist(min,max);
+    INT_COLUMN min = 1, max = std::numeric_limits<INT_COLUMN>::max();
+    std::uniform_int_distribution<INT_COLUMN> dist(min,max);
 
     std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;
     const auto initialize_before = std::chrono::steady_clock::now();
-    std::vector<uint64_t> input(scanConfig.COLUMN_SIZE);
+    std::vector<INT_COLUMN> input(scanConfig.COLUMN_SIZE);
     const auto initialize_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
         (std::chrono::steady_clock::now() - initialize_before);
     std::cout << "- Took " << initialize_duration.count()/(double)1e6 << " ms" << std::endl;
@@ -144,7 +153,7 @@ int main(int argc, char *argv[]) {
     const auto generate_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
         (std::chrono::steady_clock::now() - generate_before);
     std::cout << "- Took " << generate_duration.count()/(double)1e6 << " ms" << std::endl;
-    scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<uint64_t>>(input)));
+    scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig), std::make_shared<std::vector<INT_COLUMN>>(input)));
   }
 
   if (benchmarkConfig.CLEAR_CACHE) {
