@@ -6,6 +6,7 @@ import glob
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 import sys
+from joblib import Parallel, delayed
 from tqdm import tqdm
 
 import proc_utils as proc
@@ -68,7 +69,6 @@ def dlog(*args, **kwargs):
 def run(par):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
     so, se = proc.run_command(cmd_call)
-    # print(so)
     if len(so) == 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
@@ -81,24 +81,51 @@ def run(par):
     return results
 
 
-def gather_plot_data(query_params, y_param1, y_param2=None):
+"""
+    Multiprocessing:
+    output = mp.Queue()
+    processes = [mp.Process(target=single_run, args=(dict(par), query_params['xParam'], x_val, y_axis1,
+                y_axis2, y_param1, y_param2, output)) for x_val in x_axis[:1]]
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+    results = [output.get() for p in processes]
+"""
+def gather_plot_data(query_params, y_param1, y_param2=None, backend="threading",
+                     n_jobs=10):
+    # Use all CPUs
+    os.system(f'taskset -p 0xff {os.getpid()}')
     # Parameters
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
-    y_axis1 = []
-    y_axis2 = []
-    for x_val in tqdm(x_axis, ascii=True):
-        # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
-        par[query_params['xParam']] = x_val
-        results = run(list(par.values()))
-        core_temps = proc.get_cpu_core_temperatures()
-        for i in range(len(core_temps)):
-            results[f'cpu_temp_{i}'] = core_temps[i]
-        dlog(results)
-        y_axis1.append(float(results[y_param1]))
-        if(y_param2):
-            y_axis2.append(float(results[y_param2]))
-    # print(x_axis, y_axis1)
+    # n_jobs=-1 (all CPUs) ->
+    # n_jobs=-1 (all CPUs) ->
+    # n_jobs=10 -> 5.79 it/s
+    results = Parallel(n_jobs=n_jobs, backend=backend)(
+        delayed(single_run)(dict(par), query_params['xParam'], x_val, y_param1, y_param2)
+        for x_val in tqdm(x_axis, ascii=True))
+    assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
+        "Multithreaded results are in right order"
+    if y_param2:
+        _, y_axis1, y_axis2 = zip(*results)
+    else:
+        _, y_axis1 = zip(*results)
+    # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
     return x_axis, y_axis1, y_axis2
+
+
+def single_run(local_par, x_var, x_value, y_param1, y_param2):
+    local_par[x_var] = x_value
+    results = run(list(local_par.values()))
+    core_temps = proc.get_cpu_core_temperatures()
+    for i in range(len(core_temps)):
+        results[f'cpu_temp_{i}'] = core_temps[i]
+    dlog(results)
+    # yield (x_value, float(results[y_param1]))
+    if y_param2:
+        return (x_value, float(results[y_param1]), float(results[y_param2]))
+    # output.put((x_value, results[y_param1]))
+    return (x_value, float(results[y_param1]))
 
 
 # Same as range including stop values

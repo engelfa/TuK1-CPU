@@ -6,6 +6,7 @@
 #include <memory>
 #include <algorithm>
 #include <bitset>
+#include <thread>
 
 #include "Scan.h"
 #include "papi.h"
@@ -73,6 +74,9 @@ int main(int argc, char *argv[]) {
   PAPI_add_named_event(event_set,"PAPI_L2_TCR");
   PAPI_add_named_event(event_set,"PAPI_L3_TCR");
   PAPI_reset(event_set);
+
+  unsigned available_num_cpus = std::thread::hardware_concurrency();
+  std::cout << "Available CPUs: " << available_num_cpus << std::endl;
 
   // TODO: Multiple scans / Combine scans afterwards
   // TODO: Multicore execution
