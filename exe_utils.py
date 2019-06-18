@@ -111,9 +111,10 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
 
 def single_run(local_par, x_var, x_value, y_param1, y_param2, affinity):
     pid = os.getpid()
-    print(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    os.system(f'taskset -cp {affinity} {pid}')
-    os.system(f'taskset -cp {pid}')
+    dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
+    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
+    so, se = proc.run_command(f'taskset -cp {pid}')
+    dlog(so)
     local_par[x_var] = x_value
     results = run(list(local_par.values()))
     core_temps = proc.get_cpu_core_temperatures()
