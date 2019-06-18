@@ -15,7 +15,7 @@ import proc_utils as proc
 
 DEBUG = False
 
-CONCURRENCY = 1  # Simultaneously running jobs
+CONCURRENCY = -1  # Simultaneously running jobs
 USE_THREADING = False  # or use multiprocessing
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
@@ -89,23 +89,31 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     # Use all CPUs
     # os.system(f'taskset -p 0xff {os.getpid()}')
     # Parameters
+    processes_per_core = 2
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    cpu_affinities = (i // processes_per_core for i in range(len(x_axis)))
     # n_jobs=-1 (all CPUs) ->
     # n_jobs=10 -> 5.79 it/s
     results = Parallel(n_jobs=CONCURRENCY, backend=backend)(
-        delayed(single_run)(dict(par), query_params['xParam'], x_val, y_param1, y_param2)
-        for x_val in tqdm(x_axis, ascii=True))
+        delayed(single_run)(dict(par), query_params['xParam'], x_val, y_param1, y_param2, affinity)
+        for x_val, affinity in tqdm(list(zip(x_axis, cpu_affinities)), ascii=True))
     assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
         "Multithreaded results are in right order"
     if y_param2:
         _, y_axis1, y_axis2 = zip(*results)
     else:
         _, y_axis1 = zip(*results)
+    print("You may cancel this python run (waiting for one second)")
+    time.sleep(1)
     # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
     return x_axis, y_axis1, y_axis2
 
 
-def single_run(local_par, x_var, x_value, y_param1, y_param2):
+def single_run(local_par, x_var, x_value, y_param1, y_param2, affinity):
+    pid = os.getpid()
+    print(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
+    os.system(f'taskset -p {affinity} {pid}')
+    os.system(f'taskset -cp {pid}')
     local_par[x_var] = x_value
     results = run(list(local_par.values()))
     core_temps = proc.get_cpu_core_temperatures()
