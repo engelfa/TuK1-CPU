@@ -81,24 +81,12 @@ def run(par):
     return results
 
 
-"""
-    Multiprocessing:
-    output = mp.Queue()
-    processes = [mp.Process(target=single_run, args=(dict(par), query_params['xParam'], x_val, y_axis1,
-                y_axis2, y_param1, y_param2, output)) for x_val in x_axis[:1]]
-    for p in processes:
-        p.start()
-    for p in processes:
-        p.join()
-    results = [output.get() for p in processes]
-"""
 def gather_plot_data(query_params, y_param1, y_param2=None, backend="threading",
                      n_jobs=10):
     # Use all CPUs
     os.system(f'taskset -p 0xff {os.getpid()}')
     # Parameters
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
-    # n_jobs=-1 (all CPUs) ->
     # n_jobs=-1 (all CPUs) ->
     # n_jobs=10 -> 5.79 it/s
     results = Parallel(n_jobs=n_jobs, backend=backend)(
@@ -124,7 +112,6 @@ def single_run(local_par, x_var, x_value, y_param1, y_param2):
     # yield (x_value, float(results[y_param1]))
     if y_param2:
         return (x_value, float(results[y_param1]), float(results[y_param2]))
-    # output.put((x_value, results[y_param1]))
     return (x_value, float(results[y_param1]))
 
 
