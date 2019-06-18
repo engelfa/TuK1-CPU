@@ -12,7 +12,7 @@ def execute_test_run():
     generate_plots(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
          {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
-        'duration', 'selectivity')
+        'gb_per_sec', 'selectivity')
 
 def execute_benchmarks():
     prepare_execution()

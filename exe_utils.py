@@ -15,6 +15,8 @@ import proc_utils as proc
 
 DEBUG = False
 
+CONCURRENCY = 1  # Simultaneously running jobs
+USE_THREADING = True  # or use multiprocessing
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 PLOTS_PATH = "./plots/"
 PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
@@ -82,15 +84,15 @@ def run(par):
     return results
 
 
-def gather_plot_data(query_params, y_param1, y_param2=None, backend="threading",
-                     n_jobs=1):
+def gather_plot_data(query_params, y_param1, y_param2=None):
+    backend = "threading" if USE_THREADING else "multiprocessing"
     # Use all CPUs
     # os.system(f'taskset -p 0xff {os.getpid()}')
     # Parameters
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     # n_jobs=-1 (all CPUs) ->
     # n_jobs=10 -> 5.79 it/s
-    results = Parallel(n_jobs=n_jobs, backend=backend)(
+    results = Parallel(n_jobs=CONCURRENCY, backend=backend)(
         delayed(single_run)(dict(par), query_params['xParam'], x_val, y_param1, y_param2)
         for x_val in tqdm(x_axis, ascii=True))
     assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
@@ -110,7 +112,6 @@ def single_run(local_par, x_var, x_value, y_param1, y_param2):
     for i in range(len(core_temps)):
         results[f'cpu_temp_{i}'] = core_temps[i]
     dlog(results)
-    # yield (x_value, float(results[y_param1]))
     if y_param2:
         return (x_value, float(results[y_param1]), float(results[y_param2]))
     return (x_value, float(results[y_param1]))
