@@ -12,6 +12,7 @@ Presentation Slides: https://bit.ly/2MLJlC2
 | column_size     | uint_64 | column size                                         | yes         |
 | selectivity     | double  | percentage of entries selected by scan              | yes         |
 | clear_cache     | 0,1     | clear cache after each run                          | yes         |
+| use_if          | 0,1     | 0 means use logical operation instaed of branch     | yes         |
 | search_value    | uint_64 | scan value                                          | no          |
 | distinct_values | uint_64 | number of distinct values in uniform distribution   | no          |
 | min_range       | uint_64 | min value for search range in column                | no          |
