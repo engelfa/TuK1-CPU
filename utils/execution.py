@@ -7,8 +7,9 @@ import shutil
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from plot_utils import PLOTS_PATH
-import proc_utils as proc
+from .viz import PLOTS_PATH
+from .storage import PICKLES_PATH
+from . import proc
 
 # --------- Config Start --------- #
 
@@ -25,9 +26,15 @@ if DEBUG:
     tqdm = lambda x, **y: x  # noqa: F811, E731
 
 par = None
+is_first_run = True
 
 
 def prepare_execution():
+    global is_first_run
+    if is_first_run:
+        is_first_run = False
+    else:
+        return
     # Ensure that the program exists
     assert glob.glob(f'{PROGRAM_NAME}*'), \
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
@@ -37,8 +44,10 @@ def prepare_execution():
         if sys.argv[1] == "--clear" and os.path.isdir(PLOTS_PATH):
             print('[DEBUG] Clear plotting directory')
             shutil.rmtree(PLOTS_PATH)
+            shutil.rmtree(PICKLES_PATH)
     # Prepare plotting directory
     os.makedirs(PLOTS_PATH, exist_ok=True)
+    os.makedirs(PICKLES_PATH, exist_ok=True)
 
     print('[INFO] Overall cache size [Bit]: ', proc.get_cache_size())
     print('[INFO] CPU Core Temperatures [C]: ', ', '.join(
@@ -114,19 +123,20 @@ def frange(start, stop, step):
 
 
 def generate_data(p, y_param1, y_param2=None):
+    prepare_execution()
     if len(p) == 1:
         x_axis, y_axis1, y_axis2 = gather_plot_data(p[0], y_param1, y_param2)
         return [{
             'single_plot': True,
             'fixed_config': dict(par),
             'parameters_config': p,
+            'x_label': p[0]['xParam'],
+            'y1_label': y_param1,
+            'y2_label': y_param2,
             'runs': [{
                 'x': x_axis,
-                'x_label': p[0]['xParam'],
                 'y1': y_axis1,
-                'y1_label': y_param1,
                 'y2': y_axis2,
-                'y2_label': y_param2,
             }],
         }]
     elif len(p) == 2 and y_param2 is None:
@@ -138,9 +148,7 @@ def generate_data(p, y_param1, y_param2=None):
             x_axis, y_axis1, _ = gather_plot_data(p[1], y_param1)
             runs_data.append({
                 'x': x_axis,
-                'x_label': p[1]['xParam'],
                 'y1': y_axis1,
-                'y1_label': y_param1,
                 'label': "{} = {}".format(p[0]['xParam'], parameter),
             })
 
@@ -148,6 +156,8 @@ def generate_data(p, y_param1, y_param2=None):
             'single_plot': True,
             'fixed_config': dict(par),
             'parameters_config': p,
+            'x_label': p[1]['xParam'],
+            'y1_label': y_param1,
             'runs': runs_data,
         }]
     elif len(p) == 2:
@@ -160,11 +170,8 @@ def generate_data(p, y_param1, y_param2=None):
             x_axis, y_axis1, y_axis2 = gather_plot_data(p[1], y_param1, y_param2)
             runs_data.append({
                 'x': x_axis,
-                'x_label': p[1]['xParam'],
                 'y1': y_axis1,
-                'y1_label': y_param1,
                 'y2': y_axis2,
-                'y2_label': y_param2,
                 # Not all params are shown since they exceed the plot size by far (instead see filename)
                 'title': "{} = {}".format(p[0]['xParam'], parameter),
             })
@@ -173,6 +180,9 @@ def generate_data(p, y_param1, y_param2=None):
             'single_plot': False,
             'fixed_config': dict(par),
             'parameters_config': p,
+            'x_label': p[1]['xParam'],
+            'y1_label': y_param1,
+            'y2_label': y_param2,
             'runs': runs_data,
         }]
     else:

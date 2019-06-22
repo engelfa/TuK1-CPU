@@ -4,10 +4,10 @@ import matplotlib.style as style
 
 # --------- Config Start --------- #
 
-PLOTS_PATH = "./plots/"
+PLOTS_PATH = "./output/plots/"
 PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
 # PLOT_FORMAT = "pdf"  # gives HQ plots
-FIGSIZE = (7, 5)
+FIGSIZE = (9, 6)
 
 C_PRIMARY = '#037d95'  # blue green
 C_SECONDARY = '#ffa823'  # orange yellow
@@ -34,12 +34,15 @@ def generate_plots(data_array):
             color = COLORS[i] if data['single_plot'] else COLORS[0]
             ax = axes if data['single_plot'] else axes[i]
             create_plot(
-                run['x'], run['x_label'], run['y1'], run['y1_label'],
-                run.get('y2'), run.get('y2_label'), title=run.get('title'),
+                run['x'], data['x_label'], run['y1'], data['y1_label'],
+                run.get('y2'), data.get('y2_label'), title=run.get('title'),
                 label=run.get('label'), ax=ax, y1_color=color)
 
-        save_plot(fig, data['fixed_config'], data['parameters_config'],
-                  data['runs'][0]['y1_label'], data['runs'][0].get('y2_label'))
+        for variable_param in data['parameters_config']:
+            # If stored results are used those parametes are already removed
+            if variable_param['xParam'] in data['fixed_config']:
+                data['fixed_config'].pop(variable_param['xParam'])
+        save_plot(fig, data['fixed_config'], data['y1_label'], data.get('y2_label'))
 
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
@@ -64,9 +67,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     ax.set_title(title)
 
 
-def save_plot(fig, fixed_parameters, p, y_param1, y_param2=None):
-    for variable_param in p:
-        fixed_parameters.pop(variable_param['xParam'])
+def save_plot(fig, fixed_parameters, y_param1, y_param2=None):
     timestamp = time.strftime('%m%d-%H%M%S')
     filename = '-'.join([f'{k}-{v}' for k, v in fixed_parameters.items()]) + ';' + y_param1
     if y_param2:
