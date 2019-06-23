@@ -25,8 +25,8 @@ def execute_test_run():
          'column_size': 100, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
         # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 4}],
-         # {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
+         # [{'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
         'gb_per_sec')  # 'selectivity'
     path = store_results(data)
     data = load_results(path)

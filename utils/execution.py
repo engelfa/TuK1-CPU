@@ -165,7 +165,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
             if query_params['xParam'] == 'n_cores':
                 concurrency = x_val
             cpu_affinities = [i // jobs_per_core for i in range(query_params['n_runs'])]
-            executors = (delayed(run_single_job)(cpp_par, y_param1, y_param2, affinity)
+            executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity)
                          for affinity in tqdm(cpu_affinities, ascii=True))
             temp_results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
             if y_param2:
@@ -177,7 +177,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
                 y_axis1.append(np.mean(temp_y_axis1))
     else:
         cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
-        executors = (delayed(run_single_job)(cpp_par, y_param1, y_param2, affinity, query_params['xParam'], x_val)
+        executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity, query_params['xParam'], x_val)
                      for x_val, affinity in tqdm(list(zip(x_axis, cpu_affinities)), ascii=True))
         results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
         assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
@@ -220,13 +220,8 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
 
 
 def run_cpp_code(par):
-    print('\n\n')
-    print(par)
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
     so, se = proc.run_command(cmd_call)
-    print(cmd_call)
-    print(so)
-    print(se)
     if len(so) == 0 or len(se) > 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)

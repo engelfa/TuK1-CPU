@@ -10,3 +10,5 @@ venv/
 papi/
 jupyter.logs
 .rcforssh
+
+*.stackdump
