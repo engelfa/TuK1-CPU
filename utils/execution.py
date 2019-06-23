@@ -194,13 +194,6 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     return x_axis, y_axis1, y_axis2
 
 
-def split_control_parameters(parameters):
-    python_par = []
-    cpp_par = []
-    for p in parameters:
-        pass
-
-
 def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=None):
     pid = os.getpid()
     dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')

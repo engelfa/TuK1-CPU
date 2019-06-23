@@ -21,7 +21,7 @@ TEST = True
 
 def execute_test_run():
     set_default_parameters(
-        {'result_format': 0, 'run_count': 1, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
+        {'result_format': 0, 'run_count': 1, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
          'column_size': 100, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
         # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
@@ -40,9 +40,9 @@ def execute_test_plot():
 
 def execute_benchmarks():
     set_default_parameters(
-        {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
-         'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 4,
-         'jobs_per_core': 10})
+        {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10,
+        'pcm_set': 0, 'random_values': 1, 'column_size': 100000000, 'selectivity': 0.1,
+        'reserve_memory': 0, 'use_if': 0, 'n_cores': 4, 'jobs_per_core': 10})
     data1 = generate_data(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
          {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
@@ -72,9 +72,9 @@ def execute_benchmarks():
     generate_plots(data4)
 
     set_default_parameters(
-        {'result_format': 3, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
-         'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 4,
-         'jobs_per_core': 10})
+        {'result_format': 3, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10,
+        'pcm_set': 0, 'random_values': 1, 'column_size': 100000000, 'selectivity': 0.1,
+        'reserve_memory': 0, 'use_if': 0, 'n_cores': 4, 'jobs_per_core': 10})
     data5 = generate_data(
         [{'xParam': 'use_if', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
          {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': .1}],
@@ -83,9 +83,9 @@ def execute_benchmarks():
     generate_plots(data5)
 
     set_default_parameters(
-        {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'random_values': 1,
-         'column_size': 100000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 4,
-         'jobs_per_core': 10})
+        {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10,
+        'pcm_set': 0, 'random_values': 1, 'column_size': 100000000, 'selectivity': 0.1,
+        'reserve_memory': 0, 'use_if': 0, 'n_cores': 4, 'jobs_per_core': 10})
     data6 = generate_data(
         [{'xParam': 'reserve_memory', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
          {'xParam': 'column_size', 'xMin': 10000000, 'xMax': 100000000, 'stepSize': 10000000}],
