@@ -4,6 +4,7 @@ import sys
 import glob
 import shutil
 
+import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
@@ -15,8 +16,11 @@ from . import proc
 
 DEBUG = False
 
+# Only used if n_cores is not defined in set_default_parameters
 CONCURRENCY = 40  # Simultaneously running jobs
-PROCESSES_PER_CORE = 10  # Subprocesses running on one CPU
+JOBS_PER_CORE = 10  # Subprocesses running on one CPU
+N_CORES = CONCURRENCY // JOBS_PER_CORE
+
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 
 # ---------- Config End ---------- #
@@ -57,6 +61,9 @@ def prepare_execution():
 def set_default_parameters(new_par):
     global par
     par = new_par
+    # Ensure that this value is always defined
+    par['n_cores'] = new_par.get('n_cores', N_CORES)
+    par['jobs_per_core'] = new_par.get('jobs_per_core', JOBS_PER_CORE)
 
 
 def dlog(*args, **kwargs):
@@ -64,67 +71,11 @@ def dlog(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def run(par):
-    cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    so, se = proc.run_command(cmd_call)
-    if len(so) == 0 or len(se) > 0:
-        print(f'Calling `{cmd_call}` failed')
-        print('Error response: ', se)
-        raise ValueError('No response from subprocess!')
-    dlog(so.split('\n'))
-    so = list(filter(lambda x: x != '' and x[0] != '-', so.split('\n')))
-    dlog(so[0])
-    dlog(so[1])
-    results = dict(zip(so[0].split(','), so[1].split(',')))
-    return results
-
-
-def gather_plot_data(query_params, y_param1, y_param2=None):
-    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
-    cpu_affinities = (i // PROCESSES_PER_CORE for i in range(len(x_axis)))
-    results = Parallel(n_jobs=CONCURRENCY, backend="multiprocessing")(
-        delayed(single_run)(dict(par), query_params['xParam'], x_val, y_param1, y_param2, affinity)
-        for x_val, affinity in tqdm(list(zip(x_axis, cpu_affinities)), ascii=True))
-    assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
-        "Multithreaded results are in right order"
-    if y_param2:
-        _, y_axis1, y_axis2 = zip(*results)
-    else:
-        _, y_axis1 = zip(*results)
-        y_axis2 = None
-    print("You may cancel this python run (waiting for one second)")
-    time.sleep(1)
-    # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
-    return x_axis, y_axis1, y_axis2
-
-
-def single_run(local_par, x_var, x_value, y_param1, y_param2, affinity):
-    pid = os.getpid()
-    dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
-    so, se = proc.run_command(f'taskset -cp {pid}')
-    dlog(so)
-    local_par[x_var] = x_value
-    results = run(list(local_par.values()))
-    core_temps = proc.get_cpu_core_temperatures()
-    for i in range(len(core_temps)):
-        results[f'cpu_temp_{i}'] = core_temps[i]
-    dlog(results)
-    if y_param2:
-        return (x_value, float(results[y_param1]), float(results[y_param2]))
-    return (x_value, float(results[y_param1]))
-
-
-def frange(start, stop, step):
-    values = [start]
-    while values[-1] <= stop-step:
-        values.append(values[-1] + step)
-    return values
-
-
 def generate_data(p, y_param1, y_param2=None):
+    global par
     prepare_execution()
     if len(p) == 1:
+
         x_axis, y_axis1, y_axis2 = gather_plot_data(p[0], y_param1, y_param2)
         return [{
             'single_plot': True,
@@ -192,3 +143,104 @@ def generate_data(p, y_param1, y_param2=None):
             par[p[0]['xParam']] = i
             data.append(generate_data(p[1:], y_param1, y_param2))
         return data
+
+
+def gather_plot_data(query_params, y_param1, y_param2=None):
+    global par
+
+    concurrency = par['jobs_per_core'] * par['n_cores']
+    jobs_per_core = par['jobs_per_core']
+    if par['jobs_per_core'] == -1:
+        concurrency = -1
+    cpp_par = dict(par)
+    del cpp_par['jobs_per_core']
+    del cpp_par['n_cores']
+
+    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
+        y_axis1, y_axis2 = [], [] if y_param2 else None
+        for x_val in tqdm(x_axis):
+            if query_params['xParam'] == 'jobs_per_core':
+                jobs_per_core = x_val
+            if query_params['xParam'] == 'n_cores':
+                concurrency = x_val
+            cpu_affinities = [i // jobs_per_core for i in range(query_params['n_runs'])]
+            executors = (delayed(run_single_job)(cpp_par, y_param1, y_param2, affinity)
+                         for affinity in tqdm(cpu_affinities, ascii=True))
+            temp_results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
+            if y_param2:
+                _, temp_y_axis1, temp_y_axis2 = zip(*temp_results)
+                y_axis1.append(np.mean(temp_y_axis1))
+                y_axis2.append(np.mean(temp_y_axis2))
+            else:
+                _, temp_y_axis1 = zip(*temp_results)
+                y_axis1.append(np.mean(temp_y_axis1))
+    else:
+        cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
+        executors = (delayed(run_single_job)(cpp_par, y_param1, y_param2, affinity, query_params['xParam'], x_val)
+                     for x_val, affinity in tqdm(list(zip(x_axis, cpu_affinities)), ascii=True))
+        results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
+        assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
+            "Multithreaded results are in right order"
+        if y_param2:
+            _, y_axis1, y_axis2 = zip(*results)
+        else:
+            _, y_axis1 = zip(*results)
+            y_axis2 = None
+
+    print("You may cancel this python run (waiting for one second)")
+    time.sleep(1)
+    # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
+    return x_axis, y_axis1, y_axis2
+
+
+def split_control_parameters(parameters):
+    python_par = []
+    cpp_par = []
+    for p in parameters:
+        pass
+
+
+def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=None):
+    pid = os.getpid()
+    dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
+    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
+    so, se = proc.run_command(f'taskset -cp {pid}')
+    dlog(so)
+    if x_var is not None and x_value is not None:
+        local_par[x_var] = x_value
+    results = run_cpp_code(list(local_par.values()))
+    core_temps = proc.get_cpu_core_temperatures()
+    for i in range(len(core_temps)):
+        results[f'cpu_temp_{i}'] = core_temps[i]
+    dlog(results)
+    if y_param2:
+        return (x_value, float(results[y_param1]), float(results[y_param2]))
+    return (x_value, float(results[y_param1]))
+
+
+def run_cpp_code(par):
+    print('\n\n')
+    print(par)
+    cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
+    so, se = proc.run_command(cmd_call)
+    print(cmd_call)
+    print(so)
+    print(se)
+    if len(so) == 0 or len(se) > 0:
+        print(f'Calling `{cmd_call}` failed')
+        print('Error response: ', se)
+        raise ValueError('No response from subprocess!')
+    dlog(so.split('\n'))
+    so = list(filter(lambda x: x != '' and x[0] != '-', so.split('\n')))
+    dlog(so[0])
+    dlog(so[1])
+    results = dict(zip(so[0].split(','), so[1].split(',')))
+    return results
+
+
+def frange(start, stop, step):
+    values = [start]
+    while values[-1] <= stop-step:
+        values.append(values[-1] + step)
+    return values
