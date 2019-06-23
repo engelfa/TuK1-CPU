@@ -4,19 +4,21 @@ Presentation Slides: https://bit.ly/2MLJlC2
 
 ## Benchmark input parameters
 
-| Parameter       | Options | Meaning                                             | Implemented |
-| --------------- | ------- | --------------------------------------------------- | ----------- |
-| result_format   | 0,1,2   | counter, position list, bitmask                     | yes         |
-| run_count       | uint_64 | number of column scans to determine average runtime | yes         |
-| random_values   | 0,1     | consecutive values, random                          | yes         |
-| column_size     | uint_64 | column size                                         | yes         |
-| selectivity     | double  | percentage of entries selected by scan              | yes         |
-| clear_cache     | 0,1     | clear cache after each run                          | yes         |
-| use_if          | 0,1     | 0 means use logical operation instaed of branch     | yes         |
-| search_value    | uint_64 | scan value                                          | no          |
-| distinct_values | uint_64 | number of distinct values in uniform distribution   | no          |
-| min_range       | uint_64 | min value for search range in column                | no          |
-| max_range       | uint_64 | max value for search range in column                | no          |
+| Parameter       | Options | Meaning                                                   | Implemented |
+| --------------- | ------- | --------------------------------------------------------- | ----------- |
+| result_format   | 0,1,2   | counter, position list, bitmask                           | yes         |
+| run_count       | uint_64 | number of column scans to determine average runtime       | yes         |
+| random_values   | 0,1     | consecutive values, random                                | yes         |
+| column_size     | uint_64 | column size                                               | yes         |
+| selectivity     | double  | percentage of entries selected by scan                    | yes         |
+| clear_cache     | 0,1     | clear cache after each run                                | yes         |
+| cache_size      | uint_64 | size of cache                                             | yes         |
+| use_if          | 0,1     | 0 means use logical operation instead of branch           | yes         |
+| pcm_set         | uint_64 | usage of performance counter set (0: cache, 1: other)     | yes         |
+| search_value    | uint_64 | scan value                                                | no          |
+| distinct_values | uint_64 | number of distinct values in uniform distribution         | no          |
+| min_range       | uint_64 | min value for search range in column                      | no          |
+| max_range       | uint_64 | max value for search range in column                      | no          |
 
 ## Benchmark output parameters
 
@@ -31,10 +33,11 @@ Presentation Slides: https://bit.ly/2MLJlC2
 | duration                   | nanoseconds per run                                 | yes         |
 | rows_per_sec               | scanned rows per second                             | yes         |
 | gb_per_sec                 | data scanned per second (gb)                        | yes         |
-| branch_mispredictions      | branch mispredictions                               | yes         |
 | l1_cache_misses            |                                                     | yes         |
 | l2_cache_misses            |                                                     | yes         |
 | l3_cache_misses            |                                                     | yes         |
+| branch_mispredictions      | branch mispredictions                               | yes         |
+| stalled_cycles             | CPU cycles stalled on any resource                  | yes         |
 
 
 
