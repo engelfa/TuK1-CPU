@@ -5,8 +5,8 @@ import matplotlib.style as style
 # --------- Config Start --------- #
 
 PLOTS_PATH = "./output/plots/v1/"
-# PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
-PLOT_FORMAT = "pdf"  # gives HQ plots
+PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
+# PLOT_FORMAT = "pdf"  # gives HQ plots
 FIGSIZE = (9, 6)
 
 C_PRIMARY = '#037d95'  # blue green
@@ -21,7 +21,7 @@ COLORS = (C_PRIMARY, C_SECONDARY, C_TERNARY, C4)  # We have four different resul
 style.use('seaborn-poster')
 style.use('ggplot')
 
-def find_y_min_max(data_array):
+def find_y_min_max(data_array, lower_limit_is_0=True):
     y1_min = None
     y1_max = None
     y2_min = None
@@ -44,7 +44,10 @@ def find_y_min_max(data_array):
             if(data.get('y2_label') and (y2_max == None or temp_y2_max > y2_max)):
                 y2_max = temp_y2_max
 
-    return [(y1_min, y1_max),(y2_min, y2_max)]
+    if(lower_limit_is_0):
+        return [(0, y1_max),(0, y2_max)]
+    else:
+        return [(y1_min, y1_max),(y2_min, y2_max)]
 
 def generate_plots(data_array):
 
