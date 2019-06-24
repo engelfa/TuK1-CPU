@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   }
   PAPI_reset(event_set);
 
-  std::cout << retval1 << " " << retval2 << " " << retval3 << std::endl;
+  std::cout << "- " << retval1 << " " << retval2 << " " << retval3 << std::endl;
 
   const auto papi_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::steady_clock::now() - papi_before);
