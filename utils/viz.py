@@ -57,8 +57,8 @@ def generate_plots(data_array):
         if data['single_plot']:
             fig, axes = plt.subplots(figsize=FIGSIZE)
         else:
-            figsize = (FIGSIZE[0], FIGSIZE[1] * len(data))
-            fig, axes = plt.subplots(len(data), figsize=figsize)
+            figsize = (FIGSIZE[0], FIGSIZE[1] * len(data['runs']))
+            fig, axes = plt.subplots(len(data['runs']), figsize=figsize)
 
         for i, run in enumerate(data['runs']):
             color = COLORS[i] if data['single_plot'] else COLORS[0]
