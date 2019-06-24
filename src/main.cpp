@@ -22,7 +22,7 @@ enum ResultFormat {
 
 void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, const std::shared_ptr<ScanConfig> scanConfig, long long *papi_counts) {
   std::cout << "- Took " << duration/(double)1e6 << " ms" << std::endl;
-  std::cout << "result_format,run_count,clear_cache,cache_size,random_values,column_size,selectivity,"
+  std::cout << "result_format,run_count,clear_cache,cache_size,pcm_set,random_values,column_size,selectivity,"
                   "reserve_memory,use_if,hits,duration,rows_per_sec,gb_per_sec,";
   if (benchmarkConfig.PCM_SET == 1) {
     std::cout << "branch_mispredictions,stalled_cycles,simd_instructions" << std::endl;
@@ -34,6 +34,7 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
     << benchmarkConfig.RUN_COUNT << ","
     << benchmarkConfig.CLEAR_CACHE << ","
     << benchmarkConfig.CACHE_SIZE << ","
+    << benchmarkConfig.PCM_SET << ","
     << scanConfig->RANDOM_VALUES << ","
     << scanConfig->COLUMN_SIZE << ","
     << scanConfig->SELECTIVITY << ","
@@ -95,8 +96,6 @@ int main(int argc, char *argv[]) {
     PAPI_add_named_event(event_set,"PAPI_L3_TCM");
   }
   PAPI_reset(event_set);
-
-  std::cout << "- " << retval1 << " " << retval2 << " " << retval3 << std::endl;
 
   const auto papi_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::steady_clock::now() - papi_before);
