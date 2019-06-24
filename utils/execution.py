@@ -14,7 +14,7 @@ from . import proc
 
 # --------- Config Start --------- #
 
-DEBUG = False
+DEBUG = True
 
 # Only used if n_cores is not defined in set_default_parameters
 CONCURRENCY = 40  # Simultaneously running jobs
@@ -164,17 +164,17 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
                 jobs_per_core = x_val
             if query_params['xParam'] == 'n_cores':
                 concurrency = x_val
-            cpu_affinities = [i // jobs_per_core for i in range(query_params['n_runs'])]
+            cpu_affinities = [i // jobs_per_core for i in range(x_val)]
             executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity)
                          for affinity in tqdm(cpu_affinities, ascii=True))
             temp_results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
             if y_param2:
                 _, temp_y_axis1, temp_y_axis2 = zip(*temp_results)
-                y_axis1.append(np.mean(temp_y_axis1))
-                y_axis2.append(np.mean(temp_y_axis2))
+                y_axis1.append(np.sum(temp_y_axis1))
+                y_axis2.append(np.sum(temp_y_axis2))
             else:
                 _, temp_y_axis1 = zip(*temp_results)
-                y_axis1.append(np.mean(temp_y_axis1))
+                y_axis1.append(np.sum(temp_y_axis1))
     else:
         cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
         executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity, query_params['xParam'], x_val)

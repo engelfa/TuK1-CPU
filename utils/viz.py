@@ -4,9 +4,9 @@ import matplotlib.style as style
 
 # --------- Config Start --------- #
 
-PLOTS_PATH = "./output/plots/"
-PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
-# PLOT_FORMAT = "pdf"  # gives HQ plots
+PLOTS_PATH = "./output/plots/v1/"
+# PLOT_FORMAT = "jpg"  # requires PIL/pillow to be installed
+PLOT_FORMAT = "pdf"  # gives HQ plots
 FIGSIZE = (9, 6)
 
 C_PRIMARY = '#037d95'  # blue green
@@ -77,7 +77,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color is not None
     assert y2_color is not None
-    ax.plot(x, y1, color=y1_color, label=label)
+    if len(x) == 2:
+        ax.bar(x, y1, color=y1_color, label=label)
+    else:
+        ax.plot(x, y1, color=y1_color, label=label)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y1_label)
     if(y1_lim and y1_lim != (None, None)):
@@ -88,7 +91,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         plt.tick_params('y', color=y1_color)
 
         ax2 = ax.twinx()
-        ax2.plot(x, y2, color=y2_color)  # orange yellow
+        if len(x) == 2:
+            ax2.bar(x, y2, color=y2_color)  # orange yellow
+        else:
+            ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.set_ylabel(y2_label, color=y2_color)
         ax2.tick_params('y', color=y2_color)
         if(y2_lim and y2_lim != (None, None)):
