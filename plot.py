@@ -24,12 +24,13 @@ def execute_test_run():
         {'result_format': 0, 'run_count': 1, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
          'column_size': 100, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
-        # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
-         # [{'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
-        'gb_per_sec')  # 'selectivity'
+         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+        # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
+          {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
+        'duration')  # 'selectivity'
     path = store_results(data)
     data = load_results(path)
+    data[0]['single_plot'] = False
     generate_plots(data)
 
 
