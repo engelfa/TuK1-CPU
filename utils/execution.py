@@ -14,7 +14,7 @@ from . import proc
 
 # --------- Config Start --------- #
 
-DEBUG = True
+DEBUG = False
 
 # Only used if n_cores is not defined in set_default_parameters
 CONCURRENCY = 40  # Simultaneously running jobs
@@ -91,7 +91,7 @@ def generate_data(p, y_param1, y_param2=None):
             }],
         }]
     elif len(p) == 2 and y_param2 is None:
-        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples'])
         runs_data = []
 
         for count, parameter in enumerate(parameters):
@@ -112,7 +112,7 @@ def generate_data(p, y_param1, y_param2=None):
             'runs': runs_data,
         }]
     elif len(p) == 2:
-        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples'])
         assert len(parameters) <= 5, 'I do not want to create more than five plots in one graphic'
         runs_data = []
 
@@ -139,7 +139,7 @@ def generate_data(p, y_param1, y_param2=None):
     else:
         # Recursively call this function (creating multiple files)
         data = []
-        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples']):
             par[p[0]['xParam']] = i
             data.append(generate_data(p[1:], y_param1, y_param2))
         return data
@@ -156,7 +156,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     del cpp_par['jobs_per_core']
     del cpp_par['n_cores']
 
-    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'], query_params['log'], query_params['logSamples'])
     if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
         y_axis1, y_axis2 = [], [] if y_param2 else None
         for x_val in tqdm(x_axis):
@@ -227,7 +227,9 @@ def run_cpp_code(par):
     return results
 
 
-def frange(start, stop, step):
+def frange(start, stop, step, log, logSamples):
+    if(log):
+        return np.logspace(start, stop, logSamples)
     values = [start]
     while values[-1] <= stop-step:
         values.append(values[-1] + step)
