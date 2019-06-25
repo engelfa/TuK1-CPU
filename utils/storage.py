@@ -17,14 +17,15 @@ PICKLE_FORMAT = "pkl"
         'fixed_config': global par variable,
         'parameters_config': p,
         'x_label': x_label,
-        'y1_label': y_param1,
-        'y2_label': y_param2,
+        'y1_label?': y_param1,
+        'y2_label'?: y_param2,
         'runs': [{
             'x': x_axis,
-            'y1': y_axis1,
-            'y2': y_axis2,
-            'label': label,
-            'title': title,
+            'y1'?: y_axis1,
+            'y2'?: y_axis2,
+            'results'?: y_axis2,  // y1 or results need to be defined
+            'label?': label,
+            'title?': title,
         }, { ... }],
     }, { ... }]
 """
@@ -37,7 +38,8 @@ def store_results(data_array):
             data['fixed_config'].pop(variable_param['xParam'])
         timestamp = time.strftime('%m%d-%H%M%S')
         filename = '-'.join([f'{k}-{v}' for k, v in data['fixed_config'].items()])
-        filename += ';' + data['y1_label']
+        if 'y1_label' in data:
+            filename += ';' + data['y1_label']
         if 'y2_label' in data:
             filename += f", {data['y2_label']}"
         path = f'{PICKLES_PATH}{timestamp}-{filename}.{PICKLE_FORMAT}'

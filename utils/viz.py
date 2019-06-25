@@ -1,6 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 import matplotlib.style as style
+from copy import deepcopy
 
 # --------- Config Start --------- #
 
@@ -21,6 +22,8 @@ COLORS = (C_PRIMARY, C_SECONDARY, C_TERNARY, C4)  # We have four different resul
 style.use('seaborn-poster')
 style.use('ggplot')
 
+
+# FIXME: I tried with selectivity being the same for every point and the scaling is broken (all values are shown at the top)
 def find_y_min_max(data_array, lower_limit_is_0=True):
     y1_min = None
     y1_max = None
@@ -49,10 +52,29 @@ def find_y_min_max(data_array, lower_limit_is_0=True):
     else:
         return [(y1_min, y1_max),(y2_min, y2_max)]
 
-def generate_plots(data_array):
 
+def transform_data(data_array, y1_label=None, y2_label=None):
+    if data_array[0].get('y1_label'):
+        return data_array
+    assert y1_label is not None, 'If no label is in the data specified, '\
+        'you need to define at least one during plotting'
+    # Do not directly change the parameter to avoid side effects for multiple generate_plots calls
+    data_array = deepcopy(data_array)
+    for i, data in enumerate(data_array):
+        # data_array[i]['single_plot'] = True
+        data_array[i]['y1_label'] = y1_label
+        data_array[i]['y2_label'] = y2_label
+        for j, run in enumerate(data['runs']):
+            data_array[i]['runs'][j]['y1'] = [float(x[y1_label]) for x in run['results']]
+            if y2_label:
+                data_array[i]['runs'][j]['y2'] = [float(x[y2_label]) for x in run['results']]
+            del data_array[i]['runs'][j]['results']
+    return data_array
+
+
+def generate_plots(data_array, y1_label=None, y2_label=None):
+    data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
-    
     for data in data_array:
         log = data['parameters_config'][-1]['log']
         if data['single_plot']:
@@ -78,7 +100,8 @@ def generate_plots(data_array):
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
                 label=None, y1_color='#037d95', y2_color='#ffa823', ax=None, y1_lim=None, y2_lim=None, log=False):
-    assert label is None or y2_label is None, 'No twin axes with multiple line plots'
+    # FIXME:
+    # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color is not None
     assert y2_color is not None
     if len(x) == 2:
@@ -99,7 +122,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
 
     if y2_label:
         ax.set_ylabel(y1_label, color=y1_color)
-        plt.tick_params('y', color=y1_color)
+        ax.tick_params('y', color=y1_color)
 
         ax2 = ax.twinx()
         if len(x) == 2:

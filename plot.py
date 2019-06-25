@@ -12,31 +12,38 @@ TEST = True
       If equals -1, dispatch all process immediately.
       --> n_cores * jobs_per_core python subprocesses are dispatched at a time
 
-    If n_cores or jobs_per_core is defined as parameter of generate_data, you
-    need to define "n_runs" in addition. FOr each setting the same execution will
-    then be triggered "n_runs" times.
-
+    If n_cores and jobs_per_core are defined as parameter of generate_data,
+    each core is executing jobs_per_core runs. For each setting of n_cores the
+    same execution will then be triggered multiple times.
 """
 
 
 def execute_test_run():
     set_default_parameters(
         {'result_format': 1, 'run_count': 100, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
+         'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 1, 'jobs_per_core': 1})
     # data = generate_data(
     #     # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-    #      [{'xParam': 'n_cores', 'xMin': 20, 'xMax': 60, 'stepSize': 4, 'n_runs': 1}],
+    #      [{'xParam': 'n_cores', 'xMin': 20, 'xMax': 60, 'stepSize': 4}],
     #      # [{'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
     #     'gb_per_sec')  # 'selectivity'
+    # data = generate_data(
+    #      [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+    #     # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1}],
+    #       {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
+    #     'duration')  # 'selectivity'
     data = generate_data(
          [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1, 'log':False, 'logSamples':100},
         # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
           {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100, 'log':False, 'logSamples':100}],
         'duration')  # 'selectivity'
     path = store_results(data)
+    # path = None
     data = load_results(path)
     data[0]['single_plot'] = False
-    generate_plots(data)
+    generate_plots(data, y1_label='gb_per_sec')
+    generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
+
 
 def execute_test_plot():
     data = load_results()
@@ -173,14 +180,14 @@ def execute_benchmarks():
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
          'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data14 = generate_data(
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4, 'n_runs': 1}],
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}],
         'gb_per_sec', 'stalled_cycles')  # 'selectivity'
     store_results(data14)
     generate_plots(data14)
 
     data15 = generate_data(
          [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-         {'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4, 'n_runs': 1}],
+         {'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}],
         'gb_per_sec', 'stalled_cycles')  # 'selectivity'
     store_results(data15)
     generate_plots(data15)
