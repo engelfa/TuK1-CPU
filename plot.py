@@ -21,21 +21,27 @@ TEST = True
 def execute_test_run():
     set_default_parameters(
         {'result_format': 1, 'run_count': 100, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
+         'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 1, 'jobs_per_core': 1})
     # data = generate_data(
     #     # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
     #      [{'xParam': 'n_cores', 'xMin': 20, 'xMax': 60, 'stepSize': 4}],
     #      # [{'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
     #     'gb_per_sec')  # 'selectivity'
+    # data = generate_data(
+    #      [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+    #     # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1}],
+    #       {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
+    #     'duration')  # 'selectivity'
     data = generate_data(
          [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-        # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1}],
-          {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
-        'duration')  # 'selectivity'
+          {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}])
     path = store_results(data)
+    # path = None
     data = load_results(path)
     data[0]['single_plot'] = False
-    generate_plots(data)
+    generate_plots(data, y1_label='gb_per_sec')
+    generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
+
 
 def execute_test_plot():
     data = load_results()
