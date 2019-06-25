@@ -11,7 +11,7 @@
 
 #include "Scan.h"
 
-#define IS_PAPI __has_include("papi.h") && __has_include(<stdint.h>)
+#define IS_PAPI true
 
 #if IS_PAPI
 # include "papi.h"
