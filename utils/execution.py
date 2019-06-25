@@ -145,7 +145,19 @@ def generate_data(p, y_param1, y_param2=None):
         return data
 
 
-def gather_plot_data(query_params, y_param1, y_param2=None):
+def get_result_column_names(is_pcm_set):
+    DEFAULT_COLUMNS = [
+        "result_format", "run_count", "clear_cache", "cache_size", "pcm_set",
+        "random_values", "column_size", "selectivity", "reserve_memory",
+        "use_if", "hits", "duration", "rows_per_sec", "gb_per_sec"]
+    if is_pcm_set:
+        return DEFAULT_COLUMNS + [
+            "branch_mispredictions", "stalled_cycles", "simd_instructions"]
+    return DEFAULT_COLUMNS + [
+        "l1_cache_misses", "l2_cache_misses", "l3_cache_misses"]
+
+
+def gather_plot_data(query_params, y_param1=None, y_param2=None):
     global par
 
     concurrency = par['jobs_per_core'] * par['n_cores']
@@ -159,6 +171,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
         y_axis1, y_axis2 = [], [] if y_param2 else None
+        all_results = [dict([(key, []) for key in get_result_column_names(cpp_par['pcm_set'])]) for _ in x_axis]
         for x_val in x_axis:
             if query_params['xParam'] == 'jobs_per_core':
                 jobs_per_core = x_val
@@ -172,9 +185,14 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
                 _, temp_y_axis1, temp_y_axis2 = zip(*temp_results)
                 y_axis1.append(np.sum(temp_y_axis1))
                 y_axis2.append(np.sum(temp_y_axis2))
-            else:
+            elif y_param1:
                 _, temp_y_axis1 = zip(*temp_results)
                 y_axis1.append(np.sum(temp_y_axis1))
+            else:
+                _, temp_results = zip(*temp_results)
+                for run_result in temp_results:
+                    for key in run_result:
+                        all_results[key] += run_result[key]
     else:
         cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
         executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity, query_params['xParam'], x_val)
@@ -187,6 +205,11 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
         else:
             _, y_axis1 = zip(*results)
             y_axis2 = None
+        else:
+            _, temp_results = zip(*temp_results)
+            for run_result in temp_results:
+                for key in run_result:
+                    all_results[key] += run_result[key]
 
     print("You may cancel this python run (waiting for one second)")
     time.sleep(1)
@@ -209,7 +232,9 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
     dlog(results)
     if y_param2:
         return (x_value, float(results[y_param1]), float(results[y_param2]))
-    return (x_value, float(results[y_param1]))
+    if y_param1:
+        return (x_value, float(results[y_param1]))
+    return (x_value, results)
 
 
 def run_cpp_code(par):
@@ -227,6 +252,7 @@ def run_cpp_code(par):
     return results
 
 
+# TODO: The same as np.arange?
 def frange(start, stop, step):
     values = [start]
     while values[-1] <= stop-step:
