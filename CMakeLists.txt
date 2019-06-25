@@ -30,7 +30,9 @@ SET(SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} papi)
+if(${USE_PAPI})
+	target_link_libraries(${PROJECT_NAME} papi)
+endif(${USE_PAPI})
 # if(${USE_PAPI})
 # 	target_link_libraries(${PROJECT_NAME} ${PAPI_LIBRARIES})
 # endif()

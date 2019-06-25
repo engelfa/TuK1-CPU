@@ -10,7 +10,12 @@
 #include <limits>
 
 #include "Scan.h"
-#include "papi.h"
+
+#define IS_PAPI __has_include("papi.h") && __has_include(<stdint.h>)
+
+#if IS_PAPI
+# include "papi.h"
+#endif
 
 enum ResultFormat {
   COUNTER,
@@ -21,6 +26,12 @@ enum ResultFormat {
 };
 
 void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfig, uint64_t counter, const std::shared_ptr<ScanConfig> scanConfig, long long *papi_counts) {
+#if !(IS_PAPI)
+  std::cout << "- WARNING! PAPI is not available" << std::endl;
+#else
+  std::cout << "- PAPI is available" << std::endl;
+#endif
+  std::cout << "- Test" << std::endl;
   std::cout << "- Took " << duration/(double)1e6 << " ms" << std::endl;
   std::cout << "result_format,run_count,clear_cache,cache_size,pcm_set,random_values,column_size,selectivity,"
                   "reserve_memory,use_if,hits,duration,rows_per_sec,gb_per_sec,";
@@ -78,11 +89,12 @@ int main(int argc, char *argv[]) {
   std::random_device rd;
   std::minstd_rand e2(rd());
 
-  auto event_set = PAPI_NULL;
+  const auto papi_before = std::chrono::steady_clock::now();
   long long papi_counts[3] = {};
+#if IS_PAPI
+  auto event_set = PAPI_NULL;
 
   std::cout << "- Initialize PAPI library" << std::endl;
-  const auto papi_before = std::chrono::steady_clock::now();
   PAPI_library_init(PAPI_VER_CURRENT);
   PAPI_create_eventset(&event_set);
   int retval1, retval2, retval3, retval4 = 1;
@@ -96,6 +108,7 @@ int main(int argc, char *argv[]) {
     PAPI_add_named_event(event_set,"PAPI_L3_TCM");
   }
   PAPI_reset(event_set);
+#endif
 
   const auto papi_duration = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::steady_clock::now() - papi_before);
@@ -199,8 +212,9 @@ int main(int argc, char *argv[]) {
 
         auto counter_before_lambda = [&counter, scan] () {counter = 0;};
         auto counter_lambda = [&counter, scan] (uint64_t i) {++counter;};
-
+#if IS_PAPI
         PAPI_start(event_set);
+#endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
           scans[scan].execute(benchmarkConfig.RUN_COUNT, input, counter_lambda, counter_before_lambda, clear_cache_lambda);
@@ -209,7 +223,9 @@ int main(int argc, char *argv[]) {
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+#if IS_PAPI
         PAPI_stop(event_set, papi_counts);
+#endif
 
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
@@ -231,8 +247,9 @@ int main(int argc, char *argv[]) {
         auto positionList_lambda = [&positionList, scan] (uint64_t i) {positionList.push_back(i);};
         auto positionList_before_lambda = [&positionList, scan] () {positionList.clear();};
         uint64_t counter = 0;
-
+#if IS_PAPI
         PAPI_start(event_set);
+#endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
           scans[scan].execute(benchmarkConfig.RUN_COUNT, input, positionList_lambda, positionList_before_lambda, clear_cache_lambda);
@@ -241,7 +258,9 @@ int main(int argc, char *argv[]) {
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+#if IS_PAPI
         PAPI_stop(event_set, papi_counts);
+#endif
 
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
@@ -260,8 +279,9 @@ int main(int argc, char *argv[]) {
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         auto bitmask_lambda = [&bitmask, scan] (uint64_t i) {bitmask[i] = '1';};
         auto bitmask_before_lambda = [&bitmask, scan] () {bitmask.clear();};
-
+#if IS_PAPI
         PAPI_start(event_set);
+#endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
           scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
@@ -270,7 +290,9 @@ int main(int argc, char *argv[]) {
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+#if IS_PAPI
         PAPI_stop(event_set, papi_counts);
+#endif
 
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
@@ -303,8 +325,9 @@ int main(int argc, char *argv[]) {
         auto bitmask_lambda = [&bitmask, scan] (uint64_t i) {bitmask[i] = true;};
         auto bitmask_lambda_without_if = [&bitmask, &input, &scan] (uint64_t i) {bitmask[i] = input[i] == 0;};
         auto bitmask_before_lambda = [&bitmask, scan] () {bitmask.clear();};
-
+#if IS_PAPI
         PAPI_start(event_set);
+#endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
           if (scans[scan].config->USE_IF) {
@@ -321,7 +344,9 @@ int main(int argc, char *argv[]) {
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
+#if IS_PAPI
         PAPI_stop(event_set, papi_counts);
+#endif
 
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmask[i] == true)
