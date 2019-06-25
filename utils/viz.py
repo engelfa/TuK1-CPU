@@ -56,7 +56,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
 
     if y2_label:
         ax.set_ylabel(y1_label, color=y1_color)
-        plt.tick_params('y', color=y1_color)
+        ax.tick_params('y', color=y1_color)
 
         ax2 = ax.twinx()
         ax2.plot(x, y2, color=y2_color)  # orange yellow

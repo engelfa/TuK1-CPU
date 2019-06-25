@@ -159,7 +159,7 @@ def gather_plot_data(query_params, y_param1, y_param2=None):
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
     if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
         y_axis1, y_axis2 = [], [] if y_param2 else None
-        for x_val in tqdm(x_axis):
+        for x_val in x_axis:
             if query_params['xParam'] == 'jobs_per_core':
                 jobs_per_core = x_val
             if query_params['xParam'] == 'n_cores':
