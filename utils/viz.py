@@ -1,7 +1,9 @@
 import time
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import matplotlib.style as style
-from copy import deepcopy
+import numpy as np
 
 # --------- Config Start --------- #
 
@@ -23,34 +25,49 @@ style.use('seaborn-poster')
 style.use('ggplot')
 
 
-# FIXME: I tried with selectivity being the same for every point and the scaling is broken (all values are shown at the top)
 def find_y_min_max(data_array, lower_limit_is_0=True):
-    y1_min = None
-    y1_max = None
-    y2_min = None
-    y2_max = None
+    y1_min = np.inf
+    y1_max = -np.inf
+    y2_min = np.inf
+    y2_max = -np.inf
+    # There is only one edge case: For multiple items in data_array, the entries
+    # need only be similar for each run separately
+    y1_all_equal = True
+    y2_all_equal = True
 
     for data in data_array:
         for run in data['runs']:
-            temp_y1_min = min(run.get('y1'))
-            temp_y1_max = max(run.get('y1'))
-            if(data.get('y2_label')):
-                temp_y2_min = min(run.get('y2'))
-                temp_y2_max = max(run.get('y2'))
+            y1_min = min(*run.get('y1'), y1_min)
+            y1_max = max(*run.get('y1'), y1_max)
+            y1_all_equal = all([x == y1_min for x in run.get('y1')])
 
-            if(y1_min == None or temp_y1_min < y1_min):
-                y1_min = temp_y1_min
-            if(y1_max == None or temp_y1_max > y1_max):
-                y1_max = temp_y1_max
-            if(data.get('y2_label') and (y2_min == None or temp_y2_min < y2_min)):
-                y2_min = temp_y2_min
-            if(data.get('y2_label') and (y2_max == None or temp_y2_max > y2_max)):
-                y2_max = temp_y2_max
+            if data.get('y2_label'):
+                y2_min = min(*run.get('y2'), y2_min)
+                y2_max = max(*run.get('y2'), y2_max)
+                y2_all_equal = all([x == y2_min for x in run.get('y2')])
 
-    if(lower_limit_is_0):
-        return [(0, y1_max),(0, y2_max)]
+    if y1_all_equal:
+        if lower_limit_is_0:
+            y1_max = y1_min * 2
+        else:
+            y1_max = y1_min * 1.1
+        y1_min = y1_min * 0.9
     else:
-        return [(y1_min, y1_max),(y2_min, y2_max)]
+        y1_max *= 1.1
+        y1_min *= 0.9
+    if y2_all_equal:
+        if lower_limit_is_0:
+            y2_max = y2_min * 2
+        else:
+            y2_max = y2_min * 1.1
+        y2_min = y2_min * 0.9
+    else:
+        y2_max *= 1.1
+        y2_min *= 0.9
+    if lower_limit_is_0:
+        return (0, y1_max), (0, y2_max)
+    else:
+        return (y1_min, y1_max), (y2_min, y2_max)
 
 
 def transform_data(data_array, y1_label=None, y2_label=None):
@@ -125,6 +142,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.set_ylabel(y2_label, color=y2_color)
         ax2.tick_params('y', color=y2_color)
+        # Align ticks of y2 with y1
+        # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
         ax.ticklabel_format(axis='both', style='plain', useOffset=False)
         if(y2_lim and y2_lim != (None, None)):
             ax2.set_ylim(y2_lim[0],y2_lim[1])
