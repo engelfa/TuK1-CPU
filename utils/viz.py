@@ -48,8 +48,8 @@ TEXT_MAPPING = {
 style.use('seaborn-poster')
 style.use('ggplot')
 SEABORN_TICK_COLOR = '#555555'  # ax.get_yticklabels()[0].get_color()
-
-plt.rc('font', size=80)
+# if PRESENTATION:
+plt.rc('font', size=20)
 plt.rc('lines', linewidth=4)
 plt.rc('grid', color='#DDDDDD', linestyle='--')
 
