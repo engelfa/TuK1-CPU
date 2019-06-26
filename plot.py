@@ -44,6 +44,10 @@ def execute():
             execute_selectivity()
         except:
             pass
+        try:
+            execute_not_evenly_distributed()
+        except:
+            pass
 
         # Validation Run
         try:
@@ -64,6 +68,10 @@ def execute():
             pass
         try:
             execute_selectivity()
+        except:
+            pass
+        try:
+            execute_not_evenly_distributed()
         except:
             pass
 
@@ -116,7 +124,7 @@ def execute_not_evenly_distributed():
     announce_experiment(f'Consecutive Values (Random Values = 0)')
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 0,
-         'column_size': 2e10, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
          [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.01}])
     store_results(data)
@@ -128,7 +136,7 @@ def execute_selectivity():
     announce_experiment(f'Selectivity (Bell Plot)')
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e10, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
          [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.01}])
     store_results(data)
@@ -140,9 +148,9 @@ def execute_stalled(jobs=1):
     announce_experiment(f'Stalled Cycles (jpc={jobs})')
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e10, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
     data = generate_data(
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}])
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 3}])
     store_results(data)
     # data = load_results(path)
     generate_plots(data, y1_label='gb_per_sec')
@@ -155,10 +163,10 @@ def execute_cache_misses(jobs=1):
     announce_experiment(f'Cache Misses (cm={jobs})')
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 2e10, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
     data = generate_data(
          [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-          {'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}])
+          {'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 3}])
     store_results(data)
     # data = load_results(path)
     generate_plots(data, y1_label='gb_per_sec')
