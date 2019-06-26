@@ -19,19 +19,39 @@ C4 = '#50ff50'  # green
 COLORS = (C_PRIMARY, C_SECONDARY, C_TERNARY, C4)  # We have four different result_formats
 
 PRESENTATION = True
-""" Presentation Mode:
+"""
+    Available y labels:
+        result_format, run_count, clear_cache, cache_size, pcm_set, random_values,
+        column_size, selectivity, reserve_memory, use_if, hits, duration,
+        rows_per_sec, gb_per_sec, branch_mispredictions, stalled_cycles,
+        simd_instructions, l1_cache_misses, l2_cache_misses, l3_cache_misses
+
+    Presentation Mode:
     - No label or title (Added in slides for more readability)
 
     - Align twin axes
     - If present, keep the legend in a separate file
 """
 
+PERCENTAGE_UNIT = ['selectivity', 'l1_cache_misses', 'l2_cache_misses', 'l3_cache_misses']
+
+TEXT_MAPPING = {
+    'result_format = 0': 'Counting',
+    'result_format = 1': 'Position List',
+    'result_format = 2': 'Char Bitmask',
+    'result_format = 3': 'Boolean Bitmask',
+}
+
 # ---------- Config End ---------- #
 
 # set pyplot style
 style.use('seaborn-poster')
 style.use('ggplot')
+SEABORN_TICK_COLOR = '#555555'  # ax.get_yticklabels()[0].get_color()
 
+plt.rc('font', size=80)
+plt.rc('lines', linewidth=4)
+plt.rc('grid', color='#DDDDDD', linestyle='--')
 
 def find_y_min_max(data_array, lower_limit_is_0=True):
     y1_min = np.inf
@@ -96,6 +116,7 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
+        data['single_plot'] = not y2_label or len(data['parameters_config']) == 1
         log = data['parameters_config'][-1].get('log', False)
         if data['single_plot']:
             fig, axes = plt.subplots(figsize=FIGSIZE)
@@ -137,24 +158,15 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.bar(x, y1, color=y1_color, label=label)
     else:
         ax.plot(x, y1, color=y1_color, label=label)
-    if not PRESENTATION:
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y1_label)
-    else:
-        ax.grid(False)
-        ax.set_facecolor('white')
-        ax.spines['left'].set_color('black')
-        ax.spines['bottom'].set_color('black')
 
     if(log):
         ax.set_xscale('log')
-    else:
-        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+    # else:
+    #   ax.ticklabel_format(axis='both', style='plain', useOffset=False)
 
     if(y1_lim and y1_lim != (None, None)):
         ax.set_ylim(y1_lim[0], y1_lim[1])
     if y2_label:
-        ax.set_ylabel(y1_label, color=y1_color)
         ax.tick_params('y', color=y1_color)
 
         ax2 = ax.twinx()
@@ -162,7 +174,6 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.bar(x, y2, color=y2_color)  # orange yellow
         else:
             ax2.plot(x, y2, color=y2_color)  # orange yellow
-        ax2.set_ylabel(y2_label, color=y2_color)
         ax2.tick_params('y', color=y2_color)
         ax.ticklabel_format(axis='both', style='plain', useOffset=False)
         if(y2_lim and y2_lim != (None, None)):
@@ -171,12 +182,36 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
         ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
     elif label is not None and not PRESENTATION:
-            ax.legend()
-    ax.set_title(title)
+        ax.legend()
+
+    if not PRESENTATION:
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y1_label)
+        if y2_label:
+            ax.set_ylabel(y1_label, color=y1_color)
+            ax2.set_ylabel(y2_label, color=y2_color)
+        ax.set_title(title)
+    else:
+        ax.set_xlim(x[0] - 1, x[-1] + 1)
+        ax.set_facecolor('white')
+        ax.grid(False)
+        ax.yaxis.grid(True)
+        ax.spines['left'].set_color(SEABORN_TICK_COLOR)
+        ax.spines['bottom'].set_color(SEABORN_TICK_COLOR)
+        if y2_label:
+            ax2.grid(False)
+            ax2.spines['left'].set_color(ax.get_yticklines()[0].get_color())
+            ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
+            ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
+        if y1_label in PERCENTAGE_UNIT:
+            ax.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax.get_yticks()])
+        if y2_label in PERCENTAGE_UNIT:
+            ax2.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax2.get_yticks()])
 
 
 def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):
     labels, colors = zip(*items)
+    labels = [TEXT_MAPPING.get(x, x) for x in labels]
     handles = [plt.Line2D([], [], linewidth=3, color=colors[i]) for i in range(len(colors))]
     legend = plt.legend(handles, labels, loc=3, framealpha=0, frameon=False, ncol=1)
     plt.axis('off')

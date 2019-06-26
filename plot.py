@@ -32,8 +32,8 @@ def execute_test_run():
     path = ['./output/results/0625-221540-run_count-100-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-selectivity-0.1-reserve_memory-0-use_if-0-n_cores-1-jobs_per_core-1.pkl']
     data = load_results(path)
     # data[0]['single_plot'] = True
-    generate_plots(data, y1_label='gb_per_sec')
-    # generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
+    # generate_plots(data, y1_label='gb_per_sec')
+    generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
 
 
 def execute_test_plot():
