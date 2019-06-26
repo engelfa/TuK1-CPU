@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
   std::cout << "- Initialize PAPI library" << std::endl;
   PAPI_library_init(PAPI_VER_CURRENT);
   PAPI_create_eventset(&event_set);
-  int retval1, retval2, retval3, retval4 = 1;
+
   if (benchmarkConfig.PCM_SET == 1) {
     PAPI_add_named_event(event_set,"PAPI_BR_MSP");
     PAPI_add_named_event(event_set,"PAPI_RES_STL");
