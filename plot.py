@@ -36,11 +36,11 @@ def execute_test_run():
          [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1, 'log':False, 'logSamples':100},
         # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
           {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100, 'log':False, 'logSamples':100}],
-        'duration')  # 'selectivity'
+        )
     path = store_results(data)
     # path = None
     data = load_results(path)
-    data[0]['single_plot'] = False
+    # data[0]['single_plot'] = False
     generate_plots(data, y1_label='gb_per_sec')
     generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
 

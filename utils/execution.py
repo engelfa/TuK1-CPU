@@ -253,14 +253,9 @@ def run_cpp_code(par):
     return results
 
 
-<<<<<<< HEAD
 def frange(start, stop, step, log, logSamples):
-    if(log):
+    if log:
         return np.logspace(start, stop, logSamples)
-=======
-# TODO: The same as np.arange?
-def frange(start, stop, step):
->>>>>>> 8303257653c6f1bc9e84901ebac0151f462890bf
     values = [start]
     while values[-1] <= stop-step:
         values.append(values[-1] + step)
