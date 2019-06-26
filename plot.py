@@ -23,26 +23,17 @@ def execute_test_run():
         {'result_format': 1, 'run_count': 100, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
          'column_size': 20000000, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 1, 'jobs_per_core': 1})
     # data = generate_data(
-    #     # [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-    #      [{'xParam': 'n_cores', 'xMin': 20, 'xMax': 60, 'stepSize': 4}],
-    #      # [{'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
-    #     'gb_per_sec')  # 'selectivity'
-    # data = generate_data(
-    #      [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-    #     # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1}],
-    #       {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100}],
-    #     'duration')  # 'selectivity'
-    data = generate_data(
-         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1, 'log':False, 'logSamples':100},
-        # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
-          {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100, 'log':False, 'logSamples':100}],
-        )
-    path = store_results(data)
+    #      [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1, 'log':False, 'logSamples':100},
+    #     # [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 3, 'stepSize': 1, 'n_runs': 1}],
+    #       {'xParam': 'column_size', 'xMin': 1, 'xMax': 1000, 'stepSize': 100, 'log':False, 'logSamples':100}],
+    #     )
+    # path = store_results(data)
     # path = None
+    path = ['./output/results/0625-221540-run_count-100-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-selectivity-0.1-reserve_memory-0-use_if-0-n_cores-1-jobs_per_core-1.pkl']
     data = load_results(path)
-    # data[0]['single_plot'] = False
+    # data[0]['single_plot'] = True
     generate_plots(data, y1_label='gb_per_sec')
-    generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
+    # generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
 
 
 def execute_test_plot():

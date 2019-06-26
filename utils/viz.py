@@ -18,6 +18,14 @@ C_TERNARY = '#c8116b'  # red violet
 C4 = '#50ff50'  # green
 COLORS = (C_PRIMARY, C_SECONDARY, C_TERNARY, C4)  # We have four different result_formats
 
+PRESENTATION = True
+""" Presentation Mode:
+    - No label or title (Added in slides for more readability)
+
+    - Align twin axes
+    - If present, keep the legend in a separate file
+"""
+
 # ---------- Config End ---------- #
 
 # set pyplot style
@@ -46,24 +54,19 @@ def find_y_min_max(data_array, lower_limit_is_0=True):
                 y2_max = max(*run.get('y2'), y2_max)
                 y2_all_equal = all([x == y2_min for x in run.get('y2')])
 
-    if y1_all_equal:
-        if lower_limit_is_0:
-            y1_max = y1_min * 2
+    def handle_equality_and_padding(all_equal, y_min, y_max):
+        padding = 0.05 * (y_max - y_min)
+        if all_equal:
+            y_max *= 2
+            y_min = 0
         else:
-            y1_max = y1_min * 1.1
-        y1_min = y1_min * 0.9
-    else:
-        y1_max *= 1.1
-        y1_min *= 0.9
-    if y2_all_equal:
-        if lower_limit_is_0:
-            y2_max = y2_min * 2
-        else:
-            y2_max = y2_min * 1.1
-        y2_min = y2_min * 0.9
-    else:
-        y2_max *= 1.1
-        y2_min *= 0.9
+            y_max += padding
+            y_min += padding
+        return y_min, y_max
+
+    y1_min, y1_max = handle_equality_and_padding(y1_all_equal, y1_min, y1_max)
+    y2_min, y2_max = handle_equality_and_padding(y2_all_equal, y2_min, y2_max)
+
     if lower_limit_is_0:
         return (0, y1_max), (0, y2_max)
     else:
@@ -93,7 +96,7 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
-        log = data['parameters_config'][-1]['log']
+        log = data['parameters_config'][-1].get('log', False)
         if data['single_plot']:
             fig, axes = plt.subplots(figsize=FIGSIZE)
         else:
@@ -108,11 +111,20 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
                 run.get('y2'), data.get('y2_label'), title=run.get('title'),
                 label=run.get('label'), ax=ax, y1_color=color, y1_lim=limits[0], y2_lim=limits[1], log=log)
 
+
         for variable_param in data['parameters_config']:
             # If stored results are used those parametes are already removed
             if variable_param['xParam'] in data['fixed_config']:
                 data['fixed_config'].pop(variable_param['xParam'])
-        save_plot(fig, data['fixed_config'], data['y1_label'], data.get('y2_label'))
+
+        path_without_extension = save_plot(fig, data['fixed_config'], data['y1_label'], data.get('y2_label'))
+
+        if PRESENTATION and data['single_plot']:
+            legend_items = [(run.get('label'), c) for c, run in zip(COLORS, data['runs']) if run.get('label')]
+            if len(legend_items) != 0:
+                export_legend(legend_items, f'{path_without_extension}-legend')
+            else:
+                print("WARNING: Could not generate legend file")
 
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
@@ -125,9 +137,14 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.bar(x, y1, color=y1_color, label=label)
     else:
         ax.plot(x, y1, color=y1_color, label=label)
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y1_label)
-
+    if not PRESENTATION:
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y1_label)
+    else:
+        ax.grid(False)
+        ax.set_facecolor('white')
+        ax.spines['left'].set_color('black')
+        ax.spines['bottom'].set_color('black')
 
     if(log):
         ax.set_xscale('log')
@@ -135,8 +152,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.ticklabel_format(axis='both', style='plain', useOffset=False)
 
     if(y1_lim and y1_lim != (None, None)):
-        ax.set_ylim(y1_lim[0],y1_lim[1])
-
+        ax.set_ylim(y1_lim[0], y1_lim[1])
     if y2_label:
         ax.set_ylabel(y1_label, color=y1_color)
         ax.tick_params('y', color=y1_color)
@@ -148,14 +164,30 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.set_ylabel(y2_label, color=y2_color)
         ax2.tick_params('y', color=y2_color)
-        # Align ticks of y2 with y1
-        # ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
         ax.ticklabel_format(axis='both', style='plain', useOffset=False)
         if(y2_lim and y2_lim != (None, None)):
-            ax2.set_ylim(y2_lim[0],y2_lim[1])
-    elif label is not None:
-        ax.legend()
+            ax2.set_ylim(y2_lim[0], y2_lim[1])
+        # Align ticks of y2 and y1
+        ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
+        ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
+    elif label is not None and not PRESENTATION:
+            ax.legend()
     ax.set_title(title)
+
+
+def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):
+    labels, colors = zip(*items)
+    handles = [plt.Line2D([], [], linewidth=3, color=colors[i]) for i in range(len(colors))]
+    legend = plt.legend(handles, labels, loc=3, framealpha=0, frameon=False, ncol=1)
+    plt.axis('off')
+    fig = legend.figure
+    fig.canvas.draw()
+    bbox = legend.get_window_extent()
+    bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
+    bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
+    # timestamp = time.strftime('%m%d-%H%M%S')
+    path = f'{filepath}.{PLOT_FORMAT}'
+    fig.savefig(path, dpi="figure", bbox_inches=bbox)
 
 
 def save_plot(fig, fixed_parameters, y_param1, y_param2=None):
@@ -168,3 +200,4 @@ def save_plot(fig, fixed_parameters, y_param1, y_param2=None):
     # Vanish plots
     plt.close()
     fig = None
+    return f'{PLOTS_PATH}{timestamp}-{filename}'
