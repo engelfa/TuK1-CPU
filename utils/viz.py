@@ -93,6 +93,7 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
+        log = data['parameters_config'][-1]['log']
         if data['single_plot']:
             fig, axes = plt.subplots(figsize=FIGSIZE)
         else:
@@ -105,7 +106,7 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
             create_plot(
                 run['x'], data['x_label'], run['y1'], data['y1_label'],
                 run.get('y2'), data.get('y2_label'), title=run.get('title'),
-                label=run.get('label'), ax=ax, y1_color=color, y1_lim=limits[0], y2_lim=limits[1])
+                label=run.get('label'), ax=ax, y1_color=color, y1_lim=limits[0], y2_lim=limits[1], log=log)
 
         for variable_param in data['parameters_config']:
             # If stored results are used those parametes are already removed
@@ -115,7 +116,7 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
 
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
-                label=None, y1_color='#037d95', y2_color='#ffa823', ax=None, y1_lim=None, y2_lim=None):
+                label=None, y1_color='#037d95', y2_color='#ffa823', ax=None, y1_lim=None, y2_lim=None, log=False):
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color is not None
@@ -126,7 +127,12 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.plot(x, y1, color=y1_color, label=label)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y1_label)
-    ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+
+
+    if(log):
+        ax.set_xscale('log')
+    else:
+        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
 
     if(y1_lim and y1_lim != (None, None)):
         ax.set_ylim(y1_lim[0],y1_lim[1])

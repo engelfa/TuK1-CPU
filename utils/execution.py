@@ -95,7 +95,7 @@ def generate_data(p, y_param1=None, y_param2=None):
             data['y1_label'] = y_param1
         return data
     elif len(p) == 2 and y_param2 is None:
-        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples'])
         runs_data = []
 
         for count, parameter in enumerate(parameters):
@@ -118,7 +118,7 @@ def generate_data(p, y_param1=None, y_param2=None):
             data['y1_label'] = y_param1
         return data
     elif len(p) == 2:
-        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'])
+        parameters = frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples'])
         assert len(parameters) <= 5, 'I do not want to create more than five plots in one graphic'
         runs_data = []
 
@@ -145,7 +145,7 @@ def generate_data(p, y_param1=None, y_param2=None):
     else:
         # Recursively call this function (creating multiple files)
         data = []
-        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize']):
+        for i in frange(p[0]['xMin'], p[0]['xMax'], p[0]['stepSize'], p[0]['log'], p[0]['logSamples']):
             par[p[0]['xParam']] = i
             data.append(generate_data(p[1:], y_param1, y_param2))
         return data
@@ -174,7 +174,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
     del cpp_par['jobs_per_core']
     del cpp_par['n_cores']
 
-    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'])
+    x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'], query_params['log'], query_params['logSamples'])
     if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
         y_axis1, y_axis2 = [], [] if y_param2 else None
         all_results = [dict([(key, []) for key in get_result_column_names(cpp_par['pcm_set'])]) for _ in x_axis]
@@ -253,8 +253,14 @@ def run_cpp_code(par):
     return results
 
 
+<<<<<<< HEAD
+def frange(start, stop, step, log, logSamples):
+    if(log):
+        return np.logspace(start, stop, logSamples)
+=======
 # TODO: The same as np.arange?
 def frange(start, stop, step):
+>>>>>>> 8303257653c6f1bc9e84901ebac0151f462890bf
     values = [start]
     while values[-1] <= stop-step:
         values.append(values[-1] + step)
