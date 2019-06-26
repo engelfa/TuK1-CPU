@@ -179,7 +179,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
     x_axis = frange(query_params['xMin'], query_params['xMax'], query_params['stepSize'], query_params.get('log', False), query_params.get('logSamples', 100))
     if query_params['xParam'] in ['jobs_per_core', 'n_cores']:
         y_axis1, y_axis2 = [], [] if y_param2 else None
-        all_results = [defaultdict([]) for _ in x_axis]
+        all_results = [defaultdict(lambda: 0) for _ in x_axis]
         # [dict([(key, []) for key in get_result_column_names(cpp_par['pcm_set'])]) for _ in x_axis]
         for i, x_val in enumerate(x_axis):
             if query_params['xParam'] == 'jobs_per_core':
