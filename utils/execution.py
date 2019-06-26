@@ -201,7 +201,10 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
                 _, temp_results = zip(*temp_results)
                 for run_result in temp_results:
                     for key in run_result:
+                        if isinstance(run_result[key], str):
+                            print(key, run_result[key])
                         all_results[i][key] += run_result[key]
+        print(all_results)
     else:
         cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
         executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity, query_params['xParam'], x_val)
@@ -218,6 +221,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
     print("You may cancel this python run (waiting for one second)")
     time.sleep(1)
     # print('[INFO] Allocated Memory: ', par['column_size'], par['result_format'])
+    print(x_axis, y_axis1, y_axis2)
     return x_axis, y_axis1, y_axis2
 
 
