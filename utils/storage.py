@@ -45,6 +45,7 @@ def store_results(data_array):
         path = f'{PICKLES_PATH}{timestamp}-{filename}.{PICKLE_FORMAT}'
         with open(path, 'wb') as f:
             pickle.dump(data, f)
+        print(f'Data is stored at: {path}')
         paths.append(path)
     return paths
 

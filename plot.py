@@ -3,7 +3,7 @@ from utils.viz import generate_plots
 from utils.storage import store_results, load_results
 
 # If False execute one dummy benchmark
-TEST = True
+TEST = False
 
 """
     Parameters For Python Execution:
@@ -16,6 +16,20 @@ TEST = True
     each core is executing jobs_per_core runs. For each setting of n_cores the
     same execution will then be triggered multiple times.
 """
+
+def execute():
+    if TEST:
+        execute_test_run()
+    else:
+        # execute_benchmarks()
+        execute_cache_misses()
+        execute_cache_misses()
+        execute_cache_misses(10)
+        execute_cache_misses(10)
+        execute_stalled()
+        execute_stalled()
+        execute_stalled(10)
+        execute_stalled(10)
 
 
 def execute_test_run():
@@ -35,13 +49,39 @@ def execute_test_run():
     generate_plots(data, y1_label='gb_per_sec', y2_label='selectivity')
 
 
-def execute_test_plot():
-    data = load_results()
-    generate_plots(data)
+def execute_stalled(jobs=1):
+    announce_experiment(f'Stalled Cycles (jpc={jobs})')
+    set_default_parameters(
+        {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+    data = generate_data(
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}])
+    store_results(data)
+    # data = load_results(path)
+    generate_plots(data, y1_label='gb_per_sec')
+    generate_plots(data, y1_label='branch_mispredictions')
+    generate_plots(data, y1_label='stalled_cycles')
+    generate_plots(data, y1_label='simd_instructions')
+
+
+def execute_cache_misses(jobs=1):
+    announce_experiment(f'Cache Misses (cm={jobs})')
+    set_default_parameters(
+        {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+    data = generate_data(
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 70, 'stepSize': 4}])
+    store_results(data)
+    # data = load_results(path)
+    generate_plots(data, y1_label='gb_per_sec')
+    generate_plots(data, y1_label='l1_cache_misses')
+    generate_plots(data, y1_label='l2_cache_misses')
+    generate_plots(data, y1_label='l3_cache_misses')
+    # generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
+
 
 
 def execute_benchmarks():
-
     # cache misses over column size
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10,
@@ -182,8 +222,15 @@ def execute_benchmarks():
     store_results(data15)
     generate_plots(data15)
 
+
+def announce_experiment(title: str, dashes: int = 70):
+    print(f'\n###{"-"*dashes}###')
+    message = f'Experiment: {title}'
+    before = (dashes - len(message)) // 2
+    after = dashes - len(message) - before
+    print(f'###{"-"*before}{message}{"-"*after}###')
+    print(f'###{"-"*dashes}###\n')
+
+
 if __name__ == '__main__':
-    if TEST:
-        execute_test_run()
-    else:
-        execute_benchmarks()
+    execute()
