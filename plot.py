@@ -89,7 +89,6 @@ def execute_plotting():
     generate_plots(data, y1_label='gb_per_sec')  # Slide 42
     generate_plots(data, y1_label='branch_mispredictions')
     generate_plots(data, y1_label='stalled_cycles')  # Slide 41
-    generate_plots(data, y1_label='simd_instructions')
 
     # Branch Predictions on Selectivity:
     data = load_results()
@@ -97,7 +96,6 @@ def execute_plotting():
     generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')  # Slide 28
     # Out of curiosity:
     generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
-    generate_plots(data, y1_label='gb_per_sec', y2_label='simd_instructions')
 
     # Random Values = 0
     data = load_results()
@@ -156,7 +154,6 @@ def execute_stalled(jobs=1):
     generate_plots(data, y1_label='gb_per_sec')
     generate_plots(data, y1_label='branch_mispredictions')
     generate_plots(data, y1_label='stalled_cycles')
-    generate_plots(data, y1_label='simd_instructions')
 
 
 def execute_cache_misses(jobs=1):

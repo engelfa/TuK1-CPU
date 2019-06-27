@@ -161,8 +161,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
 
     if(log):
         ax.set_xscale('log')
-    # else:
-    #   ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+    try:
+        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+    except:
+        pass
 
     if(y1_lim and y1_lim != (None, None)):
         ax.set_ylim(y1_lim[0], y1_lim[1])
