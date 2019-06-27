@@ -33,7 +33,7 @@ PRESENTATION = True
     - If present, keep the legend in a separate file
 """
 
-PERCENTAGE_UNIT = ['selectivity', 'l1_cache_misses', 'l2_cache_misses', 'l3_cache_misses']
+PERCENTAGE_UNIT = ['selectivity']  # 'l1_cache_misses', 'l2_cache_misses', 'l3_cache_misses'
 
 TEXT_MAPPING = {
     'result_format = 0': 'Counting',
