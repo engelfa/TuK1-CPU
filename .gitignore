@@ -6,6 +6,7 @@ build/
 plots/
 output/
 venv/
+logs/
 
 papi/
 jupyter.logs

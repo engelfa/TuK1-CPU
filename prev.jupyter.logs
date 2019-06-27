@@ -1,619 +1,0 @@
-Start Notebook
-My IP: 192.168.30.112
-Jupyter process id: 70420
-Open in your browser: 192.168.30.112:8899
-[I 14:22:18.545 NotebookApp] Serving notebooks from local directory: /home/Thomas.Kellermeier/tuk
-[I 14:22:18.545 NotebookApp] The Jupyter Notebook is running at:
-[I 14:22:18.545 NotebookApp] http://(pella or 127.0.0.1):8899/
-[I 14:22:18.545 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip
-confirmation).
-[I 14:22:33.464 NotebookApp] 302 GET / (192.168.26.6) 0.77ms
-[I 14:22:33.538 NotebookApp] 302 GET /tree? (192.168.26.6) 0.70ms
-[W 14:22:40.365 NotebookApp] Not allowing login redirect to '/tree?'
-[I 14:22:40.365 NotebookApp] 302 POST /login?next=%2Ftree%3F (192.168.26.6) 1.24ms
-[I 14:22:40.435 NotebookApp] 302 GET / (192.168.26.6) 0.36ms
-
-
-###----------------------------------------------------------------------###
-###-------------------Experiment: Cache Misses (cm=1)--------------------###
-###----------------------------------------------------------------------###
-
-[INFO] Overall cache size [Bit]:  31784960.0
-[INFO] CPU Core Temperatures [C]:  32.0, 35.0, 33.0, 34.0, 34.0, 33.0, 33.0, 33.0, 32.0, 33.0, 29.0, 31.0, 33.0, 27.0, 29.0, 27.0, 27.0, 30.0, 32.0, 33.0, 33.0, 31.0, 32.0, 30.0, 33.0, 29.0, 29.0, 30.0, 32.0, 31.0, 29.0, 35.0, 31.0, 29.0, 27.0, 31.0, 35.0, 29.0, 34.0, 28.0
-100%|##########| 4/4 [00:00<00:00, 108.87it/s]
-100%|##########| 7/7 [00:00<00:00, 145.10it/s]
-100%|##########| 10/10 [00:00<00:00, 165.92it/s]
-100%|##########| 13/13 [00:00<00:00, 180.70it/s]
-100%|##########| 16/16 [00:00<00:00, 190.32it/s]
-100%|##########| 19/19 [00:00<00:00, 194.42it/s]
-100%|##########| 22/22 [00:00<00:00, 199.68it/s]
-100%|##########| 25/25 [00:00<00:00, 202.93it/s]
-100%|##########| 28/28 [00:00<00:00, 206.61it/s]
-100%|##########| 31/31 [00:00<00:00, 208.57it/s]
-100%|##########| 34/34 [00:00<00:00, 210.70it/s]
-100%|##########| 37/37 [00:00<00:00, 211.83it/s]
-100%|##########| 40/40 [00:00<00:00, 213.15it/s]
-100%|##########| 1/1 [00:34<00:00, 34.98s/it]
-  0%|          | 0/4 [00:00<?, ?it/s]You may cancel this python run (waiting for one second)
-100%|##########| 4/4 [00:00<00:00, 107.91it/s]
-100%|##########| 7/7 [00:00<00:00, 139.71it/s]
-PID: 71925
-PID: 71925
-
-  0%|          | 0/10 [00:00<?, ?it/s]100%|##########| 10/10 [00:00<00:00, 157.35it/s]
-  0%|          | 0/13 [00:00<?, ?it/s]100%|##########| 13/13 [00:00<00:00, 170.90it/s]PID: 71925
-
-  0%|          | 0/16 [00:00<?, ?it/s]100%|##########| 16/16 [00:00<00:00, 180.72it/s]
-  0%|          | 0/19 [00:00<?, ?it/s] 11%|#         | 2/19 [00:00<00:00, 20.00it/s]100%|##########| 19/19 [00:00<00:00, 186.84it/s]
-  0%|          | 0/22 [00:00<?, ?it/s]  5%|4         | 1/22 [00:00<00:02,  8.86it/s]100%|##########| 22/22 [00:00<00:00, 191.55it/s]
-  0%|          | 0/25 [00:00<?, ?it/s]  4%|4         | 1/25 [00:00<00:03,  7.88it/s]100%|##########| 25/25 [00:00<00:00, 193.97it/s]
-  0%|          | 0/28 [00:00<?, ?it/s]  4%|3         | 1/28 [00:00<00:03,  7.14it/s]100%|##########| 28/28 [00:00<00:00, 196.82it/s]
-  0%|          | 0/31 [00:00<?, ?it/s]  3%|3         | 1/31 [00:00<00:04,  6.51it/s]100%|##########| 31/31 [00:00<00:00, 198.78it/s]
-  0%|          | 0/34 [00:00<?, ?it/s]  3%|2         | 1/34 [00:00<00:05,  6.00it/s]100%|##########| 34/34 [00:00<00:00, 201.14it/s]
-  0%|          | 0/37 [00:00<?, ?it/s]  3%|2         | 1/37 [00:00<00:06,  5.49it/s]100%|##########| 37/37 [00:00<00:00, 200.60it/s]
-  0%|          | 0/40 [00:00<?, ?it/s]  2%|2         | 1/40 [00:00<00:07,  5.11it/s]100%|##########| 40/40 [00:00<00:00, 201.66it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|##########| 1/1 [00:38<00:00, 38.68s/it]
-  0%|          | 0/4 [00:00<?, ?it/s]You may cancel this python run (waiting for one second)
-100%|##########| 4/4 [00:00<00:00, 105.19it/s]
-  0%|          | 0/7 [00:00<?, ?it/s]100%|##########| 7/7 [00:00<00:00, 136.43it/s]
-  0%|          | 0/10 [00:00<?, ?it/s]100%|##########| 10/10 [00:00<00:00, 154.56it/s]
-  0%|          | 0/13 [00:00<?, ?it/s]100%|##########| 13/13 [00:00<00:00, 165.56it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]100%|##########| 16/16 [00:00<00:00, 174.68it/s]
-  0%|          | 0/19 [00:00<?, ?it/s]  5%|5         | 1/19 [00:00<00:01,  9.58it/s]100%|##########| 19/19 [00:00<00:00, 179.23it/s]
-  0%|          | 0/22 [00:00<?, ?it/s]  5%|4         | 1/22 [00:00<00:02,  8.52it/s]100%|##########| 22/22 [00:00<00:00, 184.53it/s]
-  0%|          | 0/25 [00:00<?, ?it/s]  4%|4         | 1/25 [00:00<00:03,  7.59it/s]100%|##########| 25/25 [00:00<00:00, 186.90it/s]
-  0%|          | 0/28 [00:00<?, ?it/s]  4%|3         | 1/28 [00:00<00:03,  6.90it/s]100%|##########| 28/28 [00:00<00:00, 190.36it/s]
-  0%|          | 0/31 [00:00<?, ?it/s]  3%|3         | 1/31 [00:00<00:04,  6.28it/s]100%|##########| 31/31 [00:00<00:00, 191.84it/s]
-  0%|          | 0/34 [00:00<?, ?it/s]  3%|2         | 1/34 [00:00<00:05,  5.77it/s]100%|##########| 34/34 [00:00<00:00, 193.50it/s]
-  0%|          | 0/37 [00:00<?, ?it/s]  3%|2         | 1/37 [00:00<00:06,  5.34it/s]100%|##########| 37/37 [00:00<00:00, 195.21it/s]
-  0%|          | 0/40 [00:00<?, ?it/s]  2%|2         | 1/40 [00:00<00:07,  4.94it/s]100%|##########| 40/40 [00:00<00:00, 195.18it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|##########| 1/1 [00:41<00:00, 41.79s/it]
-  0%|          | 0/4 [00:00<?, ?it/s]You may cancel this python run (waiting for one second)
-100%|##########| 4/4 [00:00<00:00, 103.78it/s]
-  0%|          | 0/7 [00:00<?, ?it/s]100%|##########| 7/7 [00:00<00:00, 131.70it/s]
-  0%|          | 0/10 [00:00<?, ?it/s]100%|##########| 10/10 [00:00<00:00, 150.62it/s]
-  0%|          | 0/13 [00:00<?, ?it/s]100%|##########| 13/13 [00:00<00:00, 160.24it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]100%|##########| 16/16 [00:00<00:00, 168.80it/s]
-  0%|          | 0/19 [00:00<?, ?it/s]  5%|5         | 1/19 [00:00<00:01,  9.19it/s]100%|##########| 19/19 [00:00<00:00, 172.13it/s]
-  0%|          | 0/22 [00:00<?, ?it/s]  5%|4         | 1/22 [00:00<00:02,  8.21it/s]100%|##########| 22/22 [00:00<00:00, 178.00it/s]
-  0%|          | 0/25 [00:00<?, ?it/s]  4%|4         | 1/25 [00:00<00:03,  7.35it/s]100%|##########| 25/25 [00:00<00:00, 181.00it/s]
-  0%|          | 0/28 [00:00<?, ?it/s]  4%|3         | 1/28 [00:00<00:04,  6.64it/s]100%|##########| 28/28 [00:00<00:00, 183.11it/s]
-  0%|          | 0/31 [00:00<?, ?it/s]  3%|3         | 1/31 [00:00<00:04,  6.10it/s]100%|##########| 31/31 [00:00<00:00, 186.30it/s]
-  0%|          | 0/34 [00:00<?, ?it/s]  3%|2         | 1/34 [00:00<00:05,  5.57it/s]100%|##########| 34/34 [00:00<00:00, 187.04it/s]
-  0%|          | 0/37 [00:00<?, ?it/s]  3%|2         | 1/37 [00:00<00:07,  5.14it/s]100%|##########| 37/37 [00:00<00:00, 187.83it/s]
-  0%|          | 0/40 [00:00<?, ?it/s]  2%|2         | 1/40 [00:00<00:08,  4.77it/s]100%|##########| 40/40 [00:00<00:00, 188.67it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|##########| 1/1 [00:30<00:00, 30.69s/it]
-  0%|          | 0/4 [00:00<?, ?it/s]You may cancel this python run (waiting for one second)
-Data is stored at: ./output/results/v1/0627-090456-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1.pkl
-
-###----------------------------------------------------------------------###
-###-------------------Experiment: Cache Misses (cm=10)-------------------###
-###----------------------------------------------------------------------###
-
-100%|##########| 4/4 [00:00<00:00, 62.05it/s]
-  0%|          | 0/7 [00:00<?, ?it/s]100%|##########| 7/7 [00:00<00:00, 121.47it/s]
-  0%|          | 0/10 [00:00<?, ?it/s]100%|##########| 10/10 [00:00<00:00, 135.68it/s][W 09:12:38.879 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;gb_per_sec-legend.jpg
-[W 09:12:38.884 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;gb_per_sec.jpg
-[W 09:12:38.947 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l2_cache_misses-legend.jpg
-[W 09:12:38.956 NotebookApp] delete /output/plots/v1/0627-075537-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l3_cache_misses-legend.jpg
-[W 09:12:38.958 NotebookApp] delete /output/plots/v1/0627-075537-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l3_cache_misses.jpg
-[W 09:12:38.960 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l1_cache_misses-legend.jpg
-[W 09:12:38.962 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l1_cache_misses.jpg
-[W 09:12:38.964 NotebookApp] delete /output/plots/v1/0627-075536-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-2000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l2_cache_misses.jpg
-[W 09:12:39.014 NotebookApp] delete /output/plots/v1/0627-090456-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;gb_per_sec-legend.jpg
-[W 09:12:39.036 NotebookApp] delete /output/plots/v1/0627-090456-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;gb_per_sec.jpg
-[W 09:12:39.038 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l1_cache_misses.jpg
-[W 09:12:39.040 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l1_cache_misses-legend.jpg
-[W 09:12:39.042 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l2_cache_misses.jpg
-[W 09:12:39.043 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l2_cache_misses-legend.jpg
-[W 09:12:39.080 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l3_cache_misses-legend.jpg
-[W 09:12:39.113 NotebookApp] delete /output/plots/v1/0627-090457-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;l3_cache_misses.jpg
-[W 09:12:39.114 NotebookApp] delete /output/plots/v1/0627-090827-run_count-25-clear_cache-0-cache_size-10-pcm_set-0-random_values-1-column_size-200000000.0-selectivity-0.1-reserve_memory-0-use_if-0-jobs_per_core-1;gb_per_sec.jpg
-
-  0%|          | 0/13 [00:00<?, ?it/s]100%|##########| 13/13 [00:00<00:00, 146.19it/s]Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1177:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1178:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1167:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1175:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1166:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1168:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1170:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1171:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1172:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1173:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1169:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1174:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-Calling `/home/Thomas.Kellermeier/tuk/build/tuk_cpu 0 25 0 10 0 1 200000000.0 0.1 0 0` failed
-Error response:  Terminated
-
-Process ForkPoolWorker-1176:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 127, in worker
-    put((job, i, result))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/lib/python3.7/multiprocessing/pool.py", line 132, in worker
-    put((job, i, (False, wrapped)))
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 173, in put
-    return send(obj)
-  File "/home/Thomas.Kellermeier/tuk/venv/lib/python3.7/site-packages/joblib/pool.py", line 159, in send
-    self._writer.send_bytes(buffer.getvalue())
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 200, in send_bytes
-    self._send_bytes(m[offset:offset + size])
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 404, in _send_bytes
-    self._send(header + buf)
-  File "/usr/lib/python3.7/multiprocessing/connection.py", line 368, in _send
-    n = write(self._handle, buf)
-BrokenPipeError: [Errno 32] Broken pipe
