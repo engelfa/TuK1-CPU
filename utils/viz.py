@@ -58,9 +58,6 @@ plt.rc('lines', linewidth=4)
 plt.rc('grid', color='#DDDDDD', linestyle='--')
 
 
-# print(plt.rcParams)
-# assert False
-
 def find_y_min_max(data_array, lower_limit_is_0=True):
     y1_min = np.inf
     y1_max = -np.inf
@@ -158,6 +155,17 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
                 label=None, y1_color='#037d95', y2_color='#ffa823', ax=None, y1_lim=None, y2_lim=None, log=False):
+    if PRESENTATION:
+        if max(y1) >= 1e9:
+            y1 = [x / 1e9 for x in y1]
+            if y1_lim:
+                y1_lim = [x / 1e9 for x in y1_lim]
+            y1_label = '[Mio]'
+        if max(y2) >= 1e9:
+            y2 = [x / 1e9 for x in y2]
+            if y2_lim:
+                y2_lim = [x / 1e9 for x in y2_lim]
+            y2_label = '[Mio]'
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color is not None
@@ -167,18 +175,17 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     else:
         ax.plot(x, y1, color=y1_color, label=label)
 
-    if(log):
+    if log:
         ax.set_xscale('log')
-    # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
-    ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+    if PRESENTATION:
+        # If the error with ScalarFormatter occurrs again, check with this line
+        # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
+        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+        # If no decimal poitns are present, remove all dots
+        if all([int(x) == x for x in ax.get_xticks()]):
+            ax.set_yticklabels([int(x) for x in ax.get_yticks()])
 
-    # TODO: Add mio translation
-    # print(ax.get_yticks())
-    # print(ax.get_ylim())
-    # if max(ax.get_yticks()) >= 1e9:
-    # ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
-
-    if(y1_lim and y1_lim != (None, None)):
+    if y1_lim and y1_lim != (None, None):
         ax.set_ylim(y1_lim[0], y1_lim[1])
     if y2_label:
         ax.tick_params('y', color=y1_color)
@@ -189,16 +196,20 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         else:
             ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.tick_params('y', color=y2_color)
-        ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
-        if(y2_lim and y2_lim != (None, None)):
+        if y2_lim and y2_lim != (None, None):
             ax2.set_ylim(y2_lim[0], y2_lim[1])
         # Align ticks of y2 and y1
         ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
         ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
-    elif label is not None and not PRESENTATION:
-        ax.legend()
+        if PRESENTATION:
+            ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
+            if max(ax2.get_yticks()) >= 1e9:
+                ax2.set_yticklabels([int(x // 1e9) for x in ax2.get_yticks()])
+                ax2.set_ylabel('[Mio.]')
 
     if not PRESENTATION:
+        if label and not y2_label:
+            ax.legend()
         ax.set_xlabel(x_label)
         ax.set_ylabel(y1_label)
         if y2_label:
@@ -206,27 +217,33 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.set_ylabel(y2_label, color=y2_color)
         ax.set_title(title)
     else:
-        delta = 0.01 * (x[-1] - x[0])
-        ax.set_xlim(x[0] - delta, x[-1] + delta)
-        ax.set_facecolor('white')
-        ax.grid(False)
-        ax.yaxis.grid(True)
-        ax.spines['left'].set_color(SEABORN_TICK_COLOR)
-        ax.spines['bottom'].set_color(SEABORN_TICK_COLOR)
-        if y2_label:
-            ax2.grid(False)
-            ax2.spines['left'].set_color(ax.get_yticklines()[0].get_color())
-            ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
-            ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
-        if y1_label in PERCENTAGE_UNIT:
-            ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
-        if y2_label in PERCENTAGE_UNIT:
-            ax2.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax2.get_yticks()])
-        if x_label == 'selectivity':
-            xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
-            if all([x[-3:] == '.0%' for x in xtick_labels]):
-                xtick_labels = [f'{x[:-3]}%' for x in xtick_labels]
-            ax.set_xticklabels(xtick_labels)
+        if y1_label == '[Mio]':
+            ax.set_ylabel(y1_label)
+        if y2_label == '[Mio]':
+            ax2.set_ylabel(y2_label)
+
+    delta = 0.01 * (x[-1] - x[0])
+    ax.set_xlim(x[0] - delta, x[-1] + delta)
+    ax.set_facecolor('white')
+    ax.grid(False)
+    ax.yaxis.grid(True)
+    ax.spines['left'].set_color(SEABORN_TICK_COLOR)
+    ax.spines['bottom'].set_color(SEABORN_TICK_COLOR)
+    if y2_label:
+        ax2.grid(False)
+        ax2.spines['left'].set_color(ax.get_yticklines()[0].get_color())
+        ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
+        ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
+    if y1_label in PERCENTAGE_UNIT:
+        ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
+    if y2_label in PERCENTAGE_UNIT:
+        ax2.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax2.get_yticks()])
+    if x_label == 'selectivity':
+        xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
+        if all([x[-3:] == '.0%' for x in xtick_labels]):
+            xtick_labels = [f'{x[:-3]}%' for x in xtick_labels]
+        ax.set_xticklabels(xtick_labels)
+
 
 
 def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):

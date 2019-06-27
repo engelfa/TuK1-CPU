@@ -35,7 +35,7 @@ def execute_plotting():
     # Cache Misses: Visualize the drops in cache hierarchy
     # print("Cache Misses Cycles: ")
     data = load_results(0)
-    generate_plots(data, 'gb_per_sec', 'rows_per_sec')
+    generate_plots(data, 'rows_per_sec', 'gb_per_sec')
     return
     # generate_plots(data, 'l1_cache_misses')
     # generate_plots(data, 'l2_cache_misses')
