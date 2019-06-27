@@ -1,6 +1,7 @@
 import time
 from copy import deepcopy
 
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 import numpy as np
@@ -50,8 +51,15 @@ style.use('ggplot')
 SEABORN_TICK_COLOR = '#555555'  # ax.get_yticklabels()[0].get_color()
 # if PRESENTATION:
 plt.rc('font', size=20)
+plt.rc('xtick', labelsize=26)
+plt.rc('ytick', labelsize=26)
+# plt.rcParams.update({'ytick.labelsize': 30})
 plt.rc('lines', linewidth=4)
 plt.rc('grid', color='#DDDDDD', linestyle='--')
+
+
+# print(plt.rcParams)
+# assert False
 
 def find_y_min_max(data_array, lower_limit_is_0=True):
     y1_min = np.inf
@@ -161,14 +169,14 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
 
     if(log):
         ax.set_xscale('log')
-    try:
-        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
-    except:
-        pass
+    # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
+    ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+
+    # TODO: Add mio translation
     # print(ax.get_yticks())
     # print(ax.get_ylim())
     # if max(ax.get_yticks()) >= 1e9:
-    # ax.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax.get_yticks()])
+    # ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
 
     if(y1_lim and y1_lim != (None, None)):
         ax.set_ylim(y1_lim[0], y1_lim[1])
@@ -181,10 +189,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         else:
             ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.tick_params('y', color=y2_color)
-        try:
-            ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
-        except:
-            pass
+        ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
         if(y2_lim and y2_lim != (None, None)):
             ax2.set_ylim(y2_lim[0], y2_lim[1])
         # Align ticks of y2 and y1
@@ -214,9 +219,14 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
             ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
         if y1_label in PERCENTAGE_UNIT:
-            ax.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax.get_yticks()])
+            ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
         if y2_label in PERCENTAGE_UNIT:
-            ax2.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax2.get_yticks()])
+            ax2.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax2.get_yticks()])
+        if x_label == 'selectivity':
+            xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
+            if all([x[-3:] == '.0%' for x in xtick_labels]):
+                xtick_labels = [f'{x[:-3]}%' for x in xtick_labels]
+            ax.set_xticklabels(xtick_labels)
 
 
 def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):

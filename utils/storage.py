@@ -74,6 +74,8 @@ def select_results(idx=None):
         print("Select from the stored results below:")
         print("\n".join([f'> {i+1}: {p}' for i, p in enumerate(result_files)]))
         idx = int(input("Insert the number of the file you want to load from: "))
+    else:
+        idx += 1
     if idx < 0:
         idx += len(result_files)
     if idx <= 0 or idx > len(result_files):
