@@ -4,7 +4,7 @@ import os
 
 # --------- Config Start --------- #
 
-PICKLES_PATH = "./output/results/v1"
+PICKLES_PATH = "./output/results/v1/"
 PICKLE_FORMAT = "pkl"
 
 # ---------- Config End ---------- #
