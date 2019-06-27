@@ -63,6 +63,7 @@ def load_results(paths=None):
 def select_results():
     result_files = [p for p in os.listdir(PICKLES_PATH)
                     if os.path.isfile(os.path.join(PICKLES_PATH, p))]
+    result_files = sorted(result_files)
     assert len(result_files), 'No result files are available in the pickles directory'
     print("Select from the stored results below:")
     print("\n".join([f'> {i+1}: {p}' for i, p in enumerate(result_files)]))
