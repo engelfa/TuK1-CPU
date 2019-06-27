@@ -22,43 +22,39 @@ def execute():
         execute_test_run()
     else:
         execute_plotting()
-        return
-        # execute_benchmarks()
-        execute_stalled()
-        execute_selectivity()
-        execute_not_evenly_distributed()
+        # return
         # execute_cache_misses()
+        # execute_multicore()
+        # execute_selectivity()
+        # execute_not_evenly_distributed()
+        # execute_benchmarks()
 
 
 
 def execute_plotting():
-    # Cache Misses:
-#     data = load_results()
-    # generate_plots(data, y1_label='gb_per_sec')
-#     generate_plots(data, y1_label='l1_cache_misses')
-#     generate_plots(data, y1_label='l2_cache_misses')
-#     generate_plots(data, y1_label='l3_cache_misses')
+    # Cache Misses: Visualize the drops in cache hierarchy
+    # print("Cache Misses Cycles: ")
+    data = load_results(0)
+    generate_plots(data, 'gb_per_sec', 'rows_per_sec')
+    return
+    # generate_plots(data, 'l1_cache_misses')
+    # generate_plots(data, 'l2_cache_misses')
+    # generate_plots(data, 'l3_cache_misses')
 
-    # Stalled Cycles:
-    print("Stalled Cycles: ")
-    data = load_results()
-    generate_plots(data, y1_label='gb_per_sec')  # Slide 42
-    generate_plots(data, y1_label='branch_mispredictions')
-    generate_plots(data, y1_label='stalled_cycles')  # Slide 41
+    # Multicore: Run across as many cores as possible so we exceed the processors overall bandwith limit
+    # print("Multicore: ")
+    # data = load_results()
+    # generate_plots(data, 'gb_per_sec')  # Slide 42
+    # generate_plots(data, 'branch_mispredictions')
+    # generate_plots(data, 'stalled_cycles')  # Slide 41
 
-    # Branch Predictions on Selectivity:
-    print("Selectivity: ")
-    data = load_results()
-    generate_plots(data, y1_label='branch_mispredictions')  # Slide 27
-    generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')  # Slide 28
-    generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
-
-    # Random Values = 0
-    print("Selectivity with consecutive order")
-    data = load_results()
-    generate_plots(data, y1_label='branch_mispredictions')  # Slide 30
-    generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')  # Slide 30
-    generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
+    # Branch Predictions: See Branch Predictions in Action (depending on selectivity)
+    print("Selectivity (incl. use_if=0 and use_if=1): ")
+    data = load_results(-1)
+    generate_plots(data, 'gb_per_sec', 'rows_per_sec')
+    # generate_plots(data, 'branch_mispredictions')  # Slide 27
+    # generate_plots(data, 'gb_per_sec', 'branch_mispredictions')  # Slide 28
+    # generate_plots(data, 'gb_per_sec', 'stalled_cycles')
 
 
 def execute_test_run():
@@ -76,60 +72,40 @@ def execute_test_run():
     generate_plots(data, y1_label='gb_per_sec')
 
 
-def execute_not_evenly_distributed():
-    announce_experiment(f'Consecutive Values (Random Values = 0)')
-    set_default_parameters(
-        {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 0,
-         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 10, 'jobs_per_core': 1})
-    data = generate_data(
-         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
-    store_results(data)
-    # data = load_results(path)
-    generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')
-
-
 def execute_selectivity():
     announce_experiment(f'Selectivity (Bell Plot)')
+    # TESTME: Higher stepSize for selectivity
+    # TESTME: Compare all result_formats
     set_default_parameters(
-        {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
+        {'result_format': 2, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
          'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 10, 'jobs_per_core': 1})
     data = generate_data(
-         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
+         [{'xParam': 'use_if', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
+          {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.2}])
     store_results(data)
-    # data = load_results(path)
-    # generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')
 
 
-def execute_stalled(jobs=1):
+def execute_multicore(jobs=1):
     announce_experiment(f'Stalled Cycles (jpc={jobs})')
+    # TESTME: Run with higher column size and/or run_count
     set_default_parameters(
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
          'column_size': 2e8, 'selectivity': 0.2, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
     data = generate_data(
          [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 10}])
     store_results(data)
-    # data = load_results(path)
-    # generate_plots(data, y1_label='gb_per_sec')
-    # generate_plots(data, y1_label='branch_mispredictions')
-    # generate_plots(data, y1_label='stalled_cycles')
 
 
-def execute_cache_misses(jobs=1):
-    announce_experiment(f'Cache Misses (cm={jobs})')
+def execute_cache_misses():
+    announce_experiment(f'Cache Misses')
+    # TESTME: use_if=1 should increase the effect since no preloading should be possible
     set_default_parameters(
-        {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+        {'result_format': 2, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 20, 'jobs_per_core': 1})
     data = generate_data(
-         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-          {'xParam': 'n_cores', 'xMin': 1, 'xMax': 40, 'stepSize': 3}])
+        #  [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
+        [{'xParam': 'column_size', 'xMin': 1e7, 'xMax': 2e8, 'stepSize': 1e7}])
     store_results(data)
-    # data = load_results(path)
-    # generate_plots(data, y1_label='gb_per_sec')
-    # generate_plots(data, y1_label='l1_cache_misses')
-    # generate_plots(data, y1_label='l2_cache_misses')
-    # generate_plots(data, y1_label='l3_cache_misses')
-    # generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
-
 
 
 def execute_benchmarks():
