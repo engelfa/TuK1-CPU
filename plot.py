@@ -113,7 +113,6 @@ def execute_stalled(jobs=1):
     # generate_plots(data, y1_label='gb_per_sec')
     # generate_plots(data, y1_label='branch_mispredictions')
     # generate_plots(data, y1_label='stalled_cycles')
-    # generate_plots(data, y1_label='simd_instructions')
 
 
 def execute_cache_misses(jobs=1):
@@ -126,10 +125,10 @@ def execute_cache_misses(jobs=1):
           {'xParam': 'n_cores', 'xMin': 1, 'xMax': 40, 'stepSize': 3}])
     store_results(data)
     # data = load_results(path)
-    generate_plots(data, y1_label='gb_per_sec')
-    generate_plots(data, y1_label='l1_cache_misses')
-    generate_plots(data, y1_label='l2_cache_misses')
-    generate_plots(data, y1_label='l3_cache_misses')
+    # generate_plots(data, y1_label='gb_per_sec')
+    # generate_plots(data, y1_label='l1_cache_misses')
+    # generate_plots(data, y1_label='l2_cache_misses')
+    # generate_plots(data, y1_label='l3_cache_misses')
     # generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
 
 
