@@ -267,4 +267,8 @@ def run_cpp_code(par):
 def frange(start, stop, step, log, logSamples, prec=1e-6):
     if log:
         return np.logspace(start, stop, logSamples)
-    return np.arange(start, stop + prec, step)
+    steps = np.arange(start, stop + prec, step)
+    if int(step) == step and int(start) == start:
+        # Transform to integer
+        steps = [int(x) for x in steps]
+    return steps
