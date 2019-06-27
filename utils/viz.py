@@ -192,7 +192,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             ax2.set_ylabel(y2_label, color=y2_color)
         ax.set_title(title)
     else:
-        ax.set_xlim(x[0] - 1, x[-1] + 1)
+        delta = 0.01 * (x[-1] - x[0])
+        ax.set_xlim(x[0] - delta, x[-1] + delta)
         ax.set_facecolor('white')
         ax.grid(False)
         ax.yaxis.grid(True)
