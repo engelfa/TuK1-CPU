@@ -24,13 +24,11 @@ def execute():
         execute_plotting()
         return
         # execute_benchmarks()
-        # execute_cache_misses()
-        # execute_cache_misses(10)
-        # execute_stalled()
-        # execute_stalled(10)
-        # execute_selectivity()
+        execute_stalled()
+        execute_selectivity()
         execute_not_evenly_distributed()
         # execute_cache_misses()
+
 
 
 def execute_plotting():
@@ -42,20 +40,21 @@ def execute_plotting():
 #     generate_plots(data, y1_label='l3_cache_misses')
 
     # Stalled Cycles:
+    print("Stalled Cycles: ")
     data = load_results()
     generate_plots(data, y1_label='gb_per_sec')  # Slide 42
     generate_plots(data, y1_label='branch_mispredictions')
     generate_plots(data, y1_label='stalled_cycles')  # Slide 41
 
     # Branch Predictions on Selectivity:
+    print("Selectivity: ")
     data = load_results()
     generate_plots(data, y1_label='branch_mispredictions')  # Slide 27
     generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')  # Slide 28
-    # Out of curiosity:
     generate_plots(data, y1_label='gb_per_sec', y2_label='stalled_cycles')
-    # return
 
     # Random Values = 0
+    print("Selectivity with consecutive order")
     data = load_results()
     generate_plots(data, y1_label='branch_mispredictions')  # Slide 30
     generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')  # Slide 30
@@ -83,7 +82,7 @@ def execute_not_evenly_distributed():
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 0,
          'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 10, 'jobs_per_core': 1})
     data = generate_data(
-         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.01}])
+         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
     store_results(data)
     # data = load_results(path)
     generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')
@@ -95,7 +94,7 @@ def execute_selectivity():
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
          'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 10, 'jobs_per_core': 1})
     data = generate_data(
-         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.01}])
+         [{'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
     store_results(data)
     # data = load_results(path)
     # generate_plots(data, y1_label='gb_per_sec', y2_label='branch_mispredictions')
