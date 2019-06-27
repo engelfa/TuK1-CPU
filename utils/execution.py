@@ -77,7 +77,6 @@ def generate_data(p, y_param1=None, y_param2=None):
     global par
     prepare_execution()
     if len(p) == 1:
-
         x_axis, y_axis1, y_axis2 = gather_plot_data(p[0], y_param1, y_param2)
         key_name = 'y1' if y_param1 else 'results'
         data = [{
@@ -265,10 +264,7 @@ def run_cpp_code(par):
     return results
 
 
-def frange(start, stop, step, log, logSamples):
+def frange(start, stop, step, log, logSamples, prec=1e-6):
     if log:
         return np.logspace(start, stop, logSamples)
-    values = [start]
-    while values[-1] <= stop-step:
-        values.append(values[-1] + step)
-    return values
+    return np.arange(start, stop + prec, step)

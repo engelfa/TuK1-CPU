@@ -165,6 +165,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.ticklabel_format(axis='both', style='plain', useOffset=False)
     except:
         pass
+    # print(ax.get_yticks())
+    # print(ax.get_ylim())
+    # if max(ax.get_yticks()) >= 1e9:
+    # ax.set_yticklabels([f'{float(x) * 100:,.1f} %' for x in ax.get_yticks()])
 
     if(y1_lim and y1_lim != (None, None)):
         ax.set_ylim(y1_lim[0], y1_lim[1])
@@ -177,7 +181,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         else:
             ax2.plot(x, y2, color=y2_color)  # orange yellow
         ax2.tick_params('y', color=y2_color)
-        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+        try:
+            ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
+        except:
+            pass
         if(y2_lim and y2_lim != (None, None)):
             ax2.set_ylim(y2_lim[0], y2_lim[1])
         # Align ticks of y2 and y1

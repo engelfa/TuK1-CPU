@@ -52,24 +52,32 @@ def store_results(data_array):
 
 def load_results(paths=None):
     if paths is None:
-        paths = select_results()
+        paths = [select_results()]
+    if not isinstance(paths, list) and not isinstance(paths, tuple):
+        paths = [paths]
     data_array = []
     for path in paths:
+        if not isinstance(path, str):
+            path = select_results(path)
         with open(path, 'rb') as f:
             data_array.append(pickle.load(f))
+        print('Parameter Config in loaded data: ', data_array[-1]['parameters_config'])
     return data_array
 
 
-def select_results():
+def select_results(idx=None):
     result_files = [p for p in os.listdir(PICKLES_PATH)
                     if os.path.isfile(os.path.join(PICKLES_PATH, p))]
     result_files = sorted(result_files)
     assert len(result_files), 'No result files are available in the pickles directory'
-    print("Select from the stored results below:")
-    print("\n".join([f'> {i+1}: {p}' for i, p in enumerate(result_files)]))
-    idx = int(input("Insert the number of the file you want to load from: "))
+    if idx is None:
+        print("Select from the stored results below:")
+        print("\n".join([f'> {i+1}: {p}' for i, p in enumerate(result_files)]))
+        idx = int(input("Insert the number of the file you want to load from: "))
+    if idx < 0:
+        idx += len(result_files)
     if idx <= 0 or idx > len(result_files):
         raise ValueError(f'Invalid item with id {idx} selected')
     selected = os.path.join(PICKLES_PATH, result_files[idx-1])
     print(f'Selected result file: {selected}')
-    return [selected]
+    return selected
