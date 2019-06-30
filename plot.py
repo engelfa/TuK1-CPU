@@ -26,30 +26,34 @@ def execute():
         execute_cache_misses()
         execute_selectivity()
         execute_multicore()
-        execute_multicore(3)
+        # execute_multicore(3)
         # execute_benchmarks()
 
 
 def execute_plotting():
     # Cache Misses: Visualize the drops in cache hierarchy
     print("Cache Misses Cycles: ")
-    data = load_results()
+    data = load_results(1)
     generate_plots(data, 'gb_per_sec', 'l1_cache_misses')
     generate_plots(data, 'gb_per_sec', 'l2_cache_misses')
     generate_plots(data, 'gb_per_sec', 'l3_cache_misses')
-    return
+    # return
 
     # Branch Predictions: See Branch Predictions in Action (depending on selectivity)
     print("Selectivity (incl. use_if=0 and use_if=1): ")
-    data = load_results()
+    data = load_results(2)
     # generate_plots(data, 'branch_mispredictions')  # Slide 27
     generate_plots(data, 'gb_per_sec', 'branch_mispredictions')  # Slide 28
     generate_plots(data, 'gb_per_sec', 'stalled_cycles')
 
     # Multicore: Run across as many cores as possible so we exceed the processors overall bandwith limit
     print("Multicore: ")
-    data = load_results()
+    data = load_results(3)
     # generate_plots(data, 'gb_per_sec')  # Slide 42
+    generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
+    generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
+    print("Multicore: ")
+    data = load_results(4)
     generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
     generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
 
@@ -77,7 +81,7 @@ def execute_cache_misses():
          'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 20, 'jobs_per_core': 1})
     data = generate_data(
         #  [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-        [{'xParam': 'column_size', 'xMin': 1e7, 'xMax': 2e8, 'stepSize': 1e7}])
+        [{'xParam': 'column_size', 'xMin': 1e7, 'xMax': 2e9, 'stepSize': 1e8}])
     store_results(data)
 
 
@@ -87,7 +91,7 @@ def execute_selectivity():
     # TESTME: Compare all result_formats
     set_default_parameters(
         {'result_format': 2, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 20, 'jobs_per_core': 1})
+         'column_size': 2e9, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 20, 'jobs_per_core': 1})
     data = generate_data(
          [{'xParam': 'random_values', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
           {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
@@ -99,7 +103,7 @@ def execute_multicore(jobs=1):
     # TESTME: Run with higher column size and/or run_count
     set_default_parameters(
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': 0.2, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+         'column_size': 2e9, 'selectivity': 0.2, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
     data = generate_data(
          [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 1}])
     store_results(data)
