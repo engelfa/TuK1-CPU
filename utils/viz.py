@@ -159,8 +159,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         # By default show no labels in presentation mode
         label, title, x_label, y1_label, y2_label = [None]*5
 
-    x, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
-        x, y1, y1_label, y2, y2_label, y1_lim, y2_lim)
+    x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
+        x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim)
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color and y2_color
@@ -230,8 +230,14 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.set_xticklabels(xtick_labels)
 
 
-def handle_units(x, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=None):
+def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=None):
     if PRESENTATION:
+        if max(x) >= 1e9:
+            x = [x / 1e9 for x in x]
+            x_label = '[Bio]'
+        elif max(x) >= 1e6:
+            x = [x / 1e6 for x in x]
+            x_label = '[Mio]'
         if max(y1) >= 1e9:
             y1 = [x / 1e9 for x in y1]
             if y1_lim:
@@ -252,7 +258,8 @@ def handle_units(x, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=No
             if y2_lim:
                 y2_lim = [x / 1e6 for x in y2_lim]
             y2_label = '[Mio]'
-    return x, y1, y1_label, y2, y2_label, y1_lim, y2_lim
+    print(y1, y1_label)
+    return x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim
 
 
 def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):

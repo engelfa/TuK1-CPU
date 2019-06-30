@@ -21,8 +21,8 @@ def execute():
     if TEST:
         execute_test_run()
     else:
-        # execute_plotting()
-        # return
+        execute_plotting()
+        return
         execute_cache_misses()
         execute_selectivity()
         execute_multicore()
