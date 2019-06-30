@@ -1,7 +1,6 @@
 import time
 from copy import deepcopy
 
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 import numpy as np
@@ -154,22 +153,17 @@ def generate_plots(data_array, y1_label=None, y2_label=None):
 
 
 def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
-                label=None, y1_color='#037d95', y2_color='#ffa823', ax=None, y1_lim=None, y2_lim=None, log=False):
+                label=None, y1_color='#037d95', y2_color='#ffa823', ax=None,
+                y1_lim=None, y2_lim=None, log=False):
     if PRESENTATION:
-        if max(y1) >= 1e9:
-            y1 = [x / 1e9 for x in y1]
-            if y1_lim:
-                y1_lim = [x / 1e9 for x in y1_lim]
-            y1_label = '[Mio]'
-        if max(y2) >= 1e9:
-            y2 = [x / 1e9 for x in y2]
-            if y2_lim:
-                y2_lim = [x / 1e9 for x in y2_lim]
-            y2_label = '[Mio]'
+        # By default show no labels in presentation mode
+        label, title, x_label, y1_label, y2_label = [None]*5
+
+    x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
+        x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim)
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
-    assert y1_color is not None
-    assert y2_color is not None
+    assert y1_color and y2_color
     if len(x) == 2:
         ax.bar(x, y1, color=y1_color, label=label)
     else:
@@ -203,24 +197,15 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
         if PRESENTATION:
             ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
-            if max(ax2.get_yticks()) >= 1e9:
-                ax2.set_yticklabels([int(x // 1e9) for x in ax2.get_yticks()])
-                ax2.set_ylabel('[Mio.]')
 
-    if not PRESENTATION:
-        if label and not y2_label:
-            ax.legend()
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y1_label)
-        if y2_label:
-            ax.set_ylabel(y1_label, color=y1_color)
-            ax2.set_ylabel(y2_label, color=y2_color)
-        ax.set_title(title)
-    else:
-        if y1_label == '[Mio]':
-            ax.set_ylabel(y1_label)
-        if y2_label == '[Mio]':
-            ax2.set_ylabel(y2_label)
+    if label and not y2_label:
+        ax.legend()
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y1_label)
+    if y2_label:
+        ax.set_ylabel(y1_label, color=y1_color)
+        ax2.set_ylabel(y2_label, color=y2_color)
+    ax.set_title(title)
 
     delta = 0.01 * (x[-1] - x[0])
     ax.set_xlim(x[0] - delta, x[-1] + delta)
@@ -244,6 +229,37 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
             xtick_labels = [f'{x[:-3]}%' for x in xtick_labels]
         ax.set_xticklabels(xtick_labels)
 
+
+def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=None):
+    if PRESENTATION:
+        if max(x) >= 1e9:
+            x = [x / 1e9 for x in x]
+            x_label = '[Bio]'
+        elif max(x) >= 1e6:
+            x = [x / 1e6 for x in x]
+            x_label = '[Mio]'
+        if max(y1) >= 1e9:
+            y1 = [x / 1e9 for x in y1]
+            if y1_lim:
+                y1_lim = [x / 1e9 for x in y1_lim]
+            y1_label = '[Bio]'
+        elif max(y1) >= 1e6:
+            y1 = [x / 1e6 for x in y1]
+            if y1_lim:
+                y1_lim = [x / 1e6 for x in y1_lim]
+            y1_label = '[Mio]'
+        if max(y2) >= 1e9:
+            y2 = [x / 1e9 for x in y2]
+            if y2_lim:
+                y2_lim = [x / 1e9 for x in y2_lim]
+            y2_label = '[Bio]'
+        elif max(y2) >= 1e6:
+            y2 = [x / 1e6 for x in y2]
+            if y2_lim:
+                y2_lim = [x / 1e6 for x in y2_lim]
+            y2_label = '[Mio]'
+    print(y1, y1_label)
+    return x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim
 
 
 def export_legend(items, filepath="legend", expand=[-4, -4, 4, 4]):
