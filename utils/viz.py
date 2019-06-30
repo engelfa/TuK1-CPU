@@ -238,27 +238,26 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
         elif max(x) >= 1e6:
             x = [x / 1e6 for x in x]
             x_label = '[Mio]'
-        if max(y1) >= 1e9:
+        if max(*y1, *y1_lim) >= 1e9:
             y1 = [x / 1e9 for x in y1]
             if y1_lim:
                 y1_lim = [x / 1e9 for x in y1_lim]
             y1_label = '[Bio]'
-        elif max(y1) >= 1e6:
+        elif max(*y1, *y1_lim) >= 1e6:
             y1 = [x / 1e6 for x in y1]
             if y1_lim:
                 y1_lim = [x / 1e6 for x in y1_lim]
             y1_label = '[Mio]'
-        if max(y2) >= 1e9:
+        if max(*y2, *y2_lim) >= 1e9:
             y2 = [x / 1e9 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e9 for x in y2_lim]
             y2_label = '[Bio]'
-        elif max(y2) >= 1e6:
+        elif max(*y2, *y2_lim) >= 1e6:
             y2 = [x / 1e6 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e6 for x in y2_lim]
             y2_label = '[Mio]'
-    print(y1, y1_label)
     return x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim
 
 
