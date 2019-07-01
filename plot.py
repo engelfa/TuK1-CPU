@@ -21,9 +21,9 @@ def execute():
     if TEST:
         execute_test_run()
     else:
-        execute_plotting()
+        # execute_plotting()
         # return
-        # execute_cache_misses()
+        execute_cache_misses()
         # execute_selectivity()
         # execute_multicore()
         # execute_multicore(3)
@@ -72,11 +72,11 @@ def execute_cache_misses():
     announce_experiment(f'Cache Misses')
     # TESTME: use_if=1 should increase the effect since no preloading should be possible
     set_default_parameters(
-        {'result_format': 2, 'run_count': 25, 'clear_cache': 1, 'cache_size': 10, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 20, 'jobs_per_core': 1})
+        {'result_format': 0, 'run_count': 1, 'clear_cache': 1, 'cache_size': 1000, 'pcm_set': 0, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.25, 'reserve_memory': 1, 'use_if': 1, 'n_cores': 20, 'jobs_per_core': 1})
     data = generate_data(
         #  [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-        [{'xParam': 'column_size', 'xMin': 1e7, 'xMax': 2e9, 'stepSize': 1e8}])
+        [{'xParam': 'column_size', 'xMin': 1e7, 'xMax': 2e9, 'stepSize': 1e7}])
     store_results(data)
 
 
