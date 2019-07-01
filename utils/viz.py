@@ -168,17 +168,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.bar(x, y1, color=y1_color, label=label)
     else:
         ax.plot(x, y1, color=y1_color, label=label)
-
     if log:
         ax.set_xscale('log')
-    if PRESENTATION:
-        # If the error with ScalarFormatter occurrs again, check with this line
-        # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
-        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
-        # If no decimal poitns are present, remove all dots
-        if all([int(x) == x for x in ax.get_xticks()]):
-            ax.set_yticklabels([int(x) for x in ax.get_yticks()])
-
     if y1_lim and y1_lim != (None, None):
         ax.set_ylim(y1_lim[0], y1_lim[1])
     if y2_label:
@@ -219,6 +210,13 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax2.spines['left'].set_color(ax.get_yticklines()[0].get_color())
         ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
         ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
+    if PRESENTATION:
+        # If the error with ScalarFormatter occurrs again, check with this line
+        # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
+        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+        # If no decimal points are present, remove all dots
+        if all([int(x) == x for x in ax.get_xticks()]):
+            ax.set_yticklabels([int(x) for x in ax.get_yticks()])
     if y1_label in PERCENTAGE_UNIT:
         ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
     if y2_label in PERCENTAGE_UNIT:
