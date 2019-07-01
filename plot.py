@@ -22,10 +22,10 @@ def execute():
         execute_test_run()
     else:
         execute_plotting()
-        return
-        execute_cache_misses()
-        execute_selectivity()
-        execute_multicore()
+        # return
+        # execute_cache_misses()
+        # execute_selectivity()
+        # execute_multicore()
         # execute_multicore(3)
         # execute_benchmarks()
 
@@ -37,12 +37,11 @@ def execute_plotting():
     generate_plots(data, 'gb_per_sec', 'l1_cache_misses')
     generate_plots(data, 'gb_per_sec', 'l2_cache_misses')
     generate_plots(data, 'gb_per_sec', 'l3_cache_misses')
-    # return
 
     # Branch Predictions: See Branch Predictions in Action (depending on selectivity)
     print("Selectivity (incl. use_if=0 and use_if=1): ")
     data = load_results()
-    # generate_plots(data, 'branch_mispredictions')  # Slide 27
+    generate_plots(data, 'branch_mispredictions')  # Slide 27
     generate_plots(data, 'gb_per_sec', 'branch_mispredictions')  # Slide 28
     generate_plots(data, 'gb_per_sec', 'stalled_cycles')
 
@@ -50,11 +49,6 @@ def execute_plotting():
     print("Multicore: ")
     data = load_results()
     # generate_plots(data, 'gb_per_sec')  # Slide 42
-    generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
-    generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
-
-    print("Multicore: ")
-    data = load_results()
     generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
     generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
 
