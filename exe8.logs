@@ -1,0 +1,10 @@
+  0%|          | 0/20 [00:00<?, ?it/s]
+###----------------------------------------------------------------------###
+###-----------------------Experiment: Cache Misses-----------------------###
+###----------------------------------------------------------------------###
+
+[INFO] Overall cache size [Bit]:  31784960.0
+[INFO] CPU Core Temperatures [C]:  30.0, 34.0, 34.0, 34.0, 33.0, 33.0, 33.0, 32.0, 31.0, 33.0, 28.0, 31.0, 29.0, 26.0, 28.0, 24.0, 27.0, 30.0, 32.0, 32.0, 32.0, 31.0, 29.0, 28.0, 31.0, 29.0, 27.0, 28.0, 32.0, 29.0, 29.0, 34.0, 31.0, 30.0, 27.0, 33.0, 36.0, 30.0, 34.0, 29.0
+100%|##########| 20/20 [00:00<00:00, 345.49it/s]
+You may cancel this python run (waiting for one second)
+Data is stored at: ./output/results/v1/0701-085327-result_format-2-run_count-25-clear_cache-1-cache_size-10-pcm_set-0-random_values-1-selectivity-0.1-reserve_memory-0-use_if-1-n_cores-20-jobs_per_core-1.pkl

@@ -46,7 +46,7 @@ Presentation Slides: https://bit.ly/2MLJlC2
 ```bash
   mkdir build
   cd build
-  cmake ..  #  -G "Unix Makefiles" on Windows & Mac
+  PAPI=1 cmake ..  #  -G "Unix Makefiles" on Windows & Mac
   make
 ```
 
