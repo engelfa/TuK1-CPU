@@ -160,7 +160,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         label, title, x_label, y1_label, y2_label = [None]*5
 
     x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
-        x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim)
+        x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim, log)
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color and y2_color
@@ -211,9 +211,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
         ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
     if PRESENTATION:
-        # If the error with ScalarFormatter occurrs again, check with this line
-        # print(isinstance(ax.yaxis.get_major_formatter(), matplotlib.ticker.ScalarFormatter))
-        ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+        if log:
+            ax.ticklabel_format(axis='yaxis', style='plain', useOffset=False)
+        else:
+            ax.ticklabel_format(axis='both', style='plain', useOffset=False)
         # If no decimal points are present, remove all dots
         if all([int(x) == x for x in ax.get_xticks()]):
             ax.set_yticklabels([int(x) for x in ax.get_yticks()])
@@ -228,12 +229,12 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.set_xticklabels(xtick_labels)
 
 
-def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=None):
+def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, y2_lim=None, log=False):
     if PRESENTATION:
-        if max(x) >= 1e9:
+        if not log and max(x) >= 1e9:
             x = [x / 1e9 for x in x]
             x_label = '[Bio]'
-        elif max(x) >= 1e6:
+        elif not log and max(x) >= 1e6:
             x = [x / 1e6 for x in x]
             x_label = '[Mio]'
         if max(*y1, *y1_lim) >= 1e9:
