@@ -22,6 +22,7 @@ DEBUG = False
 CONCURRENCY = 40  # Simultaneously running jobs
 JOBS_PER_CORE = 10  # Subprocesses running on one CPU
 N_CORES = CONCURRENCY // JOBS_PER_CORE
+AFFINITY_OFFSET = 10
 
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 
@@ -211,7 +212,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
                         all_results[i][key] = value
         y_axis1 = [dict(x) for x in all_results]
     else:
-        cpu_affinities = (i // jobs_per_core for i in range(len(x_axis)))
+        cpu_affinities = (AFFINITY_OFFSET + i // jobs_per_core for i in range(len(x_axis)))
         executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity, query_params['xParam'], x_val)
                      for x_val, affinity in tqdm(list(zip(x_axis, cpu_affinities)), ascii=True))
         results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
@@ -255,7 +256,7 @@ def run_cpp_code(par):
     if len(so) == 0 or len(se) > 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
-        raise ValueError('No response from subprocess!')
+        raise ValueError(f'No response from subprocess! Error: {se}')
     dlog(so.split('\n'))
     so = list(filter(lambda x: x != '' and x[0] != '-', so.split('\n')))
     dlog(so[0])
