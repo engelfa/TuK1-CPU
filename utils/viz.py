@@ -164,57 +164,66 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     # FIXME:
     # assert label is None or y2_label is None, 'No twin axes with multiple line plots'
     assert y1_color and y2_color
-    if len(x) == 2:
-        ax.bar(x, y1, color=y1_color, label=label)
-    else:
-        ax.plot(x, y1, color=y1_color, label=label)
-    if log:
-        ax.set_xscale('log')
-    if y1_lim and y1_lim != (None, None):
-        ax.set_ylim(y1_lim[0], y1_lim[1])
-    if y2_label:
-        ax.tick_params('y', color=y1_color)
 
+    add_to_axes(ax, x, y1, y1_color, y1_label, y1_lim)
+    ax2 = None
+    if y2_label:
         ax2 = ax.twinx()
-        if len(x) == 2:
-            ax2.bar(x, y2, color=y2_color)  # orange yellow
-        else:
-            ax2.plot(x, y2, color=y2_color)  # orange yellow
-        ax2.tick_params('y', color=y2_color)
-        if y2_lim and y2_lim != (None, None):
-            ax2.set_ylim(y2_lim[0], y2_lim[1])
-        # Align ticks of y2 and y1
-        ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
-        ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
-        if PRESENTATION:
-            ax2.ticklabel_format(axis='both', style='plain', useOffset=False)
+        add_to_axes(ax2, x, y2, y2_color, y2_label, y2_lim)
 
     if label and not y2_label:
         ax.legend()
+    if not log:
+        delta = 0.01 * (x[-1] - x[0])
+        ax.set_xlim(x[0] - delta, x[-1] + delta)
+    else:
+        ax.set_xscale('log')
     ax.set_xlabel(x_label)
-    ax.set_ylabel(y1_label)
-    if y2_label:
-        ax.set_ylabel(y1_label, color=y1_color)
-        ax2.set_ylabel(y2_label, color=y2_color)
     ax.set_title(title)
 
-    delta = 0.01 * (x[-1] - x[0])
-    ax.set_xlim(x[0] - delta, x[-1] + delta)
+    prettify_axes(ax, ax2)
+    prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log)
+
+
+def add_to_axes(ax, x, y, color, label, limits):
+    if len(x) == 2:
+        ax.bar(x, y, color=color, label=label)
+    else:
+        ax.plot(x, y, color=color, label=label)
+
+    if limits and limits != (None, None):
+        ax.set_ylim(limits[0], limits[1])
+
+
+def prettify_axes(ax, ax2):
     ax.set_facecolor('white')
     ax.grid(False)
     ax.yaxis.grid(True)
     ax.spines['left'].set_color(SEABORN_TICK_COLOR)
     ax.spines['bottom'].set_color(SEABORN_TICK_COLOR)
-    if y2_label:
+    if ax2:
         ax2.grid(False)
         ax2.spines['left'].set_color(ax.get_yticklines()[0].get_color())
         ax2.spines['bottom'].set_color(SEABORN_TICK_COLOR)
         ax2.spines['right'].set_color(ax2.get_yticklines()[0].get_color())
+
+
+def prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log):
+    ax.set_ylabel(y1_label)
+    if y2_label:
+        ax.set_ylabel(y1_label, color=y1_color)
+        ax2.set_ylabel(y2_label, color=y2_color)
+        ax.tick_params('y', color=y1_color)
+        ax2.tick_params('y', color=y2_color)
+
+        # Align ticks of y2 and y1
+        ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
+        ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
+        if PRESENTATION:
+            ax2.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
+
     if PRESENTATION:
-        if log:
-            ax.ticklabel_format(axis='yaxis', style='plain', useOffset=False)
-        else:
-            ax.ticklabel_format(axis='both', style='plain', useOffset=False)
+        ax.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
         # If no decimal points are present, remove all dots
         if all([int(x) == x for x in ax.get_xticks()]):
             ax.set_yticklabels([int(x) for x in ax.get_yticks()])
