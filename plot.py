@@ -1,3 +1,5 @@
+import sys
+
 from utils.execution import set_default_parameters, generate_data
 from utils.viz import generate_plots
 from utils.storage import store_results, load_results
@@ -21,8 +23,10 @@ def execute():
     if TEST:
         execute_test_run()
     else:
-        # execute_plotting()
-        # return
+        if "--plot" in sys.argv:
+            announce_experiment('Plot Results')
+            execute_plotting()
+            return
         execute_cache_misses()
         # execute_selectivity()
         # execute_multicore()
@@ -32,25 +36,34 @@ def execute():
 
 def execute_plotting():
     # Cache Misses: Visualize the drops in cache hierarchy
-    print("Cache Misses Cycles: ")
-    data = load_results()
-    generate_plots(data, 'gb_per_sec', 'l1_cache_misses')
-    generate_plots(data, 'gb_per_sec', 'l2_cache_misses')
-    generate_plots(data, 'gb_per_sec', 'l3_cache_misses')
+    try:
+        print("Cache Misses Cycles: ")
+        data = load_results()
+        generate_plots(data, 'gb_per_sec', 'l1_cache_misses')
+        generate_plots(data, 'gb_per_sec', 'l2_cache_misses')
+        generate_plots(data, 'gb_per_sec', 'l3_cache_misses')
+    except KeyboardInterrupt:
+        pass
 
     # Branch Predictions: See Branch Predictions in Action (depending on selectivity)
-    print("Selectivity (incl. use_if=0 and use_if=1): ")
-    data = load_results()
-    generate_plots(data, 'branch_mispredictions')  # Slide 27
-    generate_plots(data, 'gb_per_sec', 'branch_mispredictions')  # Slide 28
-    generate_plots(data, 'gb_per_sec', 'stalled_cycles')
+    try:
+        print("Selectivity (incl. use_if=0 and use_if=1): ")
+        data = load_results()
+        generate_plots(data, 'branch_mispredictions')  # Slide 27
+        generate_plots(data, 'gb_per_sec', 'branch_mispredictions')  # Slide 28
+        generate_plots(data, 'gb_per_sec', 'stalled_cycles')
+    except KeyboardInterrupt:
+        pass
 
     # Multicore: Run across as many cores as possible so we exceed the processors overall bandwith limit
-    print("Multicore: ")
-    data = load_results()
-    # generate_plots(data, 'gb_per_sec')  # Slide 42
-    generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
-    generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
+    try:
+        print("Multicore: ")
+        data = load_results()
+        # generate_plots(data, 'gb_per_sec')  # Slide 42
+        generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
+        generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
+    except KeyboardInterrupt:
+        pass
 
 
 def execute_test_run():
