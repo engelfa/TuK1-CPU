@@ -46,11 +46,10 @@ def prepare_execution():
         'The benchmark code must be compiled and placed at ./build/tuk_cpu'
 
     # If defined, remove and recreate the plots directory
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "--clear" and os.path.isdir(PLOTS_PATH):
-            print('[DEBUG] Clear plotting directory')
-            shutil.rmtree(PLOTS_PATH)
-            shutil.rmtree(PICKLES_PATH)
+    if "--clear" in sys.argv and os.path.isdir(PLOTS_PATH):
+        print('[DEBUG] Clear plotting directory')
+        shutil.rmtree(PLOTS_PATH)
+        shutil.rmtree(PICKLES_PATH)
     # Prepare plotting directory
     os.makedirs(PLOTS_PATH, exist_ok=True)
     os.makedirs(PICKLES_PATH, exist_ok=True)
