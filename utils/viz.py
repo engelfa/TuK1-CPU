@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.style as style
 import numpy as np
 
+import locale
+# Use dots for thousand steps and comma for decimal digits
+locale.setlocale(locale.LC_ALL, 'en_EN.utf-8')
+
+
 # --------- Config Start --------- #
 
 PLOTS_PATH = "./output/plots/v1/"
@@ -157,7 +162,10 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
                 y1_lim=None, y2_lim=None, log=False):
     if PRESENTATION:
         # By default show no labels in presentation mode
-        label, title, x_label, y1_label, y2_label = [None]*5
+        label, title = [None]*2
+        label, title = [None]*2
+        label, title = [None]*2
+        label, title = [None]*2
 
     x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
         x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim, log)
@@ -167,7 +175,7 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
 
     add_to_axes(ax, x, y1, y1_color, y1_label, y1_lim)
     ax2 = None
-    if y2_label:
+    if y2:
         ax2 = ax.twinx()
         add_to_axes(ax2, x, y2, y2_color, y2_label, y2_lim)
 
@@ -178,8 +186,9 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.set_xlim(x[0] - delta, x[-1] + delta)
     else:
         ax.set_xscale('log')
-    ax.set_xlabel(x_label)
-    ax.set_title(title)
+    if not PRESENTATION:
+        ax.set_xlabel(x_label)
+        ax.set_title(title)
 
     prettify_axes(ax, ax2)
     prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log)
@@ -209,28 +218,38 @@ def prettify_axes(ax, ax2):
 
 
 def prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log):
-    ax.set_ylabel(y1_label)
+    if not PRESENTATION:
+        ax.set_ylabel(y1_label)
     if y2_label:
-        ax.set_ylabel(y1_label, color=y1_color)
-        ax2.set_ylabel(y2_label, color=y2_color)
-        ax.tick_params('y', color=y1_color)
-        ax2.tick_params('y', color=y2_color)
+        if not PRESENTATION or y1_label[0] == '[':
+            ax.set_ylabel(y1_label, color=y1_color)
+        if not PRESENTATION or y2_label[0] == '[':
+            ax2.set_ylabel(y2_label, color=y2_color)
+        # ax.tick_params('y', color=y1_color)
+        # ax2.tick_params('y', color=y2_color)
 
         # Align ticks of y2 and y1
         ax2.set_yticks(np.linspace(ax2.get_yticks()[0], ax2.get_yticks()[-1], len(ax.get_yticks())))
         ax.set_yticks(np.linspace(ax.get_yticks()[0], ax.get_yticks()[-1], len(ax.get_yticks())))
-        if PRESENTATION:
-            ax2.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
+        # if PRESENTATION:
+        #     ax2.ticklabel_format(axis='yaxis', style='plain', useOffset=False)
 
     if PRESENTATION:
-        ax.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
-        # If no decimal points are present, remove all dots
-        if all([int(x) == x for x in ax.get_xticks()]):
-            ax.set_yticklabels([int(x) for x in ax.get_yticks()])
+        # TODO: Do we still need this since we already use format() below
+        # ax.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
     if y1_label in PERCENTAGE_UNIT:
         ax.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax.get_yticks()])
+    else:
+        step_size = abs(ax.get_yticks()[0] - ax.get_yticks()[1])
+        has_integer_step_size = int(step_size) == step_size
+        ax.set_yticklabels([locale.format('%d' if has_integer_step_size else '%.2f' , x, 1) for x in ax.get_yticks()])
     if y2_label in PERCENTAGE_UNIT:
         ax2.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax2.get_yticks()])
+    elif y2_label:
+        step_size = abs(ax2.get_yticks()[0] - ax2.get_yticks()[1])
+        has_integer_step_size = int(step_size) == step_size
+        ax2.set_yticklabels([locale.format('%d' if has_integer_step_size else '%.2f', x, 1) for x in ax2.get_yticks()])  # %.3g to allow up to three signs
+    print(x_label, PERCENTAGE_UNIT, x_label in PERCENTAGE_UNIT)
     if x_label == 'selectivity':
         xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
         if all([x[-3:] == '.0%' for x in xtick_labels]):
@@ -256,12 +275,12 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
             if y1_lim:
                 y1_lim = [x / 1e6 for x in y1_lim]
             y1_label = '[Mio]'
-        if max(*y2, *y2_lim) >= 1e9:
+        if y2 and max(*y2, *y2_lim) >= 1e9:
             y2 = [x / 1e9 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e9 for x in y2_lim]
             y2_label = '[Bio]'
-        elif max(*y2, *y2_lim) >= 1e6:
+        elif y2 and max(*y2, *y2_lim) >= 1e6:
             y2 = [x / 1e6 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e6 for x in y2_lim]
