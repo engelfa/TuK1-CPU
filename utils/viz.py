@@ -7,7 +7,7 @@ import numpy as np
 
 import locale
 # Use dots for thousand steps and comma for decimal digits
-locale.setlocale(locale.LC_ALL, 'en_EN.utf-8')
+locale.setlocale(locale.LC_ALL, 'en_US.utf-8')
 
 
 # --------- Config Start --------- #
