@@ -16,18 +16,6 @@ int main(int argc, char *argv[]) {
   uint64_t hits = 0;
   uint64_t _SIZE = 10000000;
 
-  // const auto before_cache = std::chrono::steady_clock::now();
-  // for(auto i = 0; i < 10; ++i) {  
-  //   std::vector<uint32_t> clear = std::vector<uint32_t>();
-  //   clear.resize(10 * 1000 * 1000, 3);
-  //   for (uint i = 1; i < clear.size(); i+=2) {
-  //       clear[i] += dist(e2);
-  //   }
-  //   clear.resize(0);
-  // }
-  // const auto duration_cache = std::chrono::duration_cast<std::chrono::nanoseconds>
-  //                             (std::chrono::steady_clock::now() - before_cache) / 10;
-
   for (uint64_t size = 1000; size < _SIZE; size *= 1.2) {
 
     std::vector<INT_COLUMN> input(size, 0);
@@ -42,6 +30,7 @@ int main(int argc, char *argv[]) {
     std::shuffle(input.begin(), input.end(), e2);
     
     const auto before = std::chrono::steady_clock::now();
+
     for (int run = 0; run < ((_SIZE) / size); ++run) {
       
       for (int line = 0; line < size; ++line) {
@@ -49,25 +38,18 @@ int main(int argc, char *argv[]) {
           ++hits;
         }
       }
-
     }
+
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
                               (std::chrono::steady_clock::now() - before);
-
-    // auto result_time = duration.count()/((double)((size / size) + 10) * 1e9);
-    // auto gb = (((size / size) + 10) * (uint64_t)size * 2) / (double) 1e9;
-    // std::cout << gb / result_time << std::endl;
     
     auto result_time = duration.count()/(double)(((_SIZE) / size) * 1e9);
     auto gb = (size) / (double) 1e9;
     std::cout << gb / result_time << std::endl;
-
-    //std::cout << "seconds per run per core" << result_time << std::endl;
-    //std::cout << "GB " << gb*size << std::endl;
   }
 
   std::vector<uint32_t> clear = std::vector<uint32_t>();
-  clear.resize(400 * 1000 * 1000, 3);
+  clear.resize(100 * 1000 * 1000, 3);
   for (uint i = 1; i < clear.size(); i+=2) {
       clear[i] += dist(e2);
   }
