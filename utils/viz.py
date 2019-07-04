@@ -121,11 +121,12 @@ def transform_data(data_array, y1_label=None, y2_label=None):
     return data_array
 
 
-def generate_plots(data_array, y1_label=None, y2_label=None):
+# If separate equals true it will always prefer using multiple subplots than merging the lineplots in one
+def generate_plots(data_array, y1_label=None, y2_label=None, separate=False):
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
-        data['single_plot'] = not y2_label or len(data['parameters_config']) == 1
+        data['single_plot'] = (not y2_label and not separate) or len(data['parameters_config']) == 1
         log = data['parameters_config'][-1].get('log', False)
         if data['single_plot']:
             fig, axes = plt.subplots(figsize=FIGSIZE)
@@ -163,9 +164,6 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     if PRESENTATION:
         # By default show no labels in presentation mode
         label, title = [None]*2
-        label, title = [None]*2
-        label, title = [None]*2
-        label, title = [None]*2
 
     x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim = handle_units(
         x, x_label, y1, y1_label, y2, y2_label, y1_lim, y2_lim, log)
@@ -178,6 +176,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     if y2:
         ax2 = ax.twinx()
         add_to_axes(ax2, x, y2, y2_color, y2_label, y2_lim)
+    prettify_axes(ax, ax2)
+    prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log)
 
     if label and not y2_label:
         ax.legend()
@@ -191,9 +191,6 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
         ax.set_title(title)
     elif x_label[0] == '[':
         ax.set_xlabel(x_label)
-
-    prettify_axes(ax, ax2)
-    prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log)
 
 
 def add_to_axes(ax, x, y, color, label, limits):
@@ -244,17 +241,23 @@ def prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, lo
     else:
         step_size = abs(ax.get_yticks()[0] - ax.get_yticks()[1])
         has_integer_step_size = int(step_size) == step_size
-        ax.set_yticklabels([locale.format('%d' if has_integer_step_size else '%.2f' , x, 1) for x in ax.get_yticks()])
+        ytick_labels = [locale.format('%d' if has_integer_step_size else '%.2f', x, 1) for x in ax.get_yticks()]
+        ax.set_yticks(ax.get_yticks())
+        ax.set_yticklabels(ytick_labels)
     if y2_label in PERCENTAGE_UNIT:
         ax2.set_yticklabels([f'{float(x) * 100:,.1f}%' for x in ax2.get_yticks()])
     elif y2_label:
         step_size = abs(ax2.get_yticks()[0] - ax2.get_yticks()[1])
         has_integer_step_size = int(step_size) == step_size
-        ax2.set_yticklabels([locale.format('%d' if has_integer_step_size else '%.2f', x, 1) for x in ax2.get_yticks()])  # %.3g to allow up to three signs
+        # %.3g to allow up to three signs
+        ytick2_labels = [locale.format('%d' if has_integer_step_size else '%.2f', x, 1) for x in ax2.get_yticks()]
+        ax2.set_yticks(ax2.get_yticks())
+        ax2.set_yticklabels(ytick2_labels)
     if x_label == 'selectivity':
         xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
         if all([x[-3:] == '.0%' for x in xtick_labels]):
             xtick_labels = [f'{x[:-3]}%' for x in xtick_labels]
+        ax.set_xticks(ax.get_xticks())
         ax.set_xticklabels(xtick_labels)
 
 
