@@ -9,7 +9,7 @@ venv/
 logs/
 
 papi/
-jupyter.logs
+*.logs
 .rcforssh
 
 *.stackdump
