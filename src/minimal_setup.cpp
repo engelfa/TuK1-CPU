@@ -65,5 +65,5 @@ int main(int argc, char *argv[]) {
     auto gb = (20 * (uint64_t) 40000000 * 4) / (double) 1e9;
     std::cout << gb / result_time << std::endl;
   }
-  std::cout << counters << std::endl;
+  std::cout << counter << std::endl;
 }
