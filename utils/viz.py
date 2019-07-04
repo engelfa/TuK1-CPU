@@ -189,6 +189,8 @@ def create_plot(x, x_label, y1, y1_label, y2=None, y2_label=None, title='',
     if not PRESENTATION:
         ax.set_xlabel(x_label)
         ax.set_title(title)
+    elif x_label[0] == '[':
+        ax.set_xlabel(x_label)
 
     prettify_axes(ax, ax2)
     prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, log)
@@ -234,7 +236,7 @@ def prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, lo
         # if PRESENTATION:
         #     ax2.ticklabel_format(axis='yaxis', style='plain', useOffset=False)
 
-    if PRESENTATION:
+    # if PRESENTATION:
         # TODO: Do we still need this since we already use format() below
         # ax.ticklabel_format(axis='yaxis' if log else 'both', style='plain', useOffset=False)
     if y1_label in PERCENTAGE_UNIT:
@@ -249,7 +251,6 @@ def prettify_labels(ax, ax2, x_label, y1_label, y2_label, y1_color, y2_color, lo
         step_size = abs(ax2.get_yticks()[0] - ax2.get_yticks()[1])
         has_integer_step_size = int(step_size) == step_size
         ax2.set_yticklabels([locale.format('%d' if has_integer_step_size else '%.2f', x, 1) for x in ax2.get_yticks()])  # %.3g to allow up to three signs
-    print(x_label, PERCENTAGE_UNIT, x_label in PERCENTAGE_UNIT)
     if x_label == 'selectivity':
         xtick_labels = [f'{float(x) * 100:,.1f}%' for x in ax.get_xticks()]
         if all([x[-3:] == '.0%' for x in xtick_labels]):
