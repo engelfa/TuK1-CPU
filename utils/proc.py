@@ -2,7 +2,22 @@ import subprocess
 import psutil
 
 
-def run_command(cmd_call):
+is_numactl_supported = None
+
+
+def check_numactl():
+    global is_numactl_supported
+    if is_numactl_supported is None:
+        so, se = run_command('Numactl')
+        is_numactl_supported = len(se) == 0
+        if not is_numactl_supported:
+            print('Warning! Numactl is not supported. Parallelization will still work but with shared memory')
+    return is_numactl_supported
+
+
+def run_command(cmd_call, affinity=None):
+    if affinity and check_numactl():
+            cmd_call = f'Numactl -N {affinity} -m {affinity} {cmd_call}'
     proc = subprocess.Popen(
         cmd_call,
         shell=True,

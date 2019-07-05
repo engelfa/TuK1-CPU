@@ -232,12 +232,12 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
 def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=None):
     pid = os.getpid()
     dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
-    so, se = proc.run_command(f'taskset -cp {pid}')
-    dlog(so)
+    # so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
+    # so, se = proc.run_command(f'taskset -cp {pid}')
+    # dlog(so)
     if x_var is not None and x_value is not None:
         local_par[x_var] = x_value
-    results = run_cpp_code(list(local_par.values()))
+    results = run_cpp_code(list(local_par.values()), affinity)
     core_temps = proc.get_cpu_core_temperatures()
     for i in range(len(core_temps)):
         results[f'cpu_temp_{i}'] = core_temps[i]
@@ -249,9 +249,9 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
     return (x_value, results)
 
 
-def run_cpp_code(par):
+def run_cpp_code(par, affinity):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    so, se = proc.run_command(cmd_call)
+    so, se = proc.run_command(cmd_call, affinity)
     if len(so) == 0 or len(se) > 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
