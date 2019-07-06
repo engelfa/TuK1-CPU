@@ -86,15 +86,14 @@ def execute_test_run():
     generate_plots(data, y1_label='gb_per_sec')
 
 
-def execute_cache_misses(result_format=0, selectivity=0.3):
+def execute_cache_misses():
     announce_experiment(f'Cache Misses')
     # TESTME: use_if=1 should increase the effect since no preloading should be possible
     set_default_parameters(
-        {'result_format': result_format, 'run_count': 500, 'clear_cache': 1, 'cache_size': 40, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': selectivity, 'reserve_memory': 1, 'use_if': 1, 'n_cores': 35, 'jobs_per_core': 1})
+        {'result_format': 0, 'run_count': 500, 'clear_cache': 1, 'cache_size': 40, 'pcm_set': 0, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.25, 'reserve_memory': 1, 'use_if': 1, 'n_cores': 50, 'jobs_per_core': 1})
     data = generate_data(
-        [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},
-        {'xParam': 'column_size', 'xMin': 5, 'xMax': 9, 'stepSize': 1e8, 'log': True, 'logSamples': 150}])
+        [{'xParam': 'column_size', 'xMin': 3, 'xMax': 7, 'stepSize': 1e8, 'log': True, 'logSamples': 50}])
     store_results(data)
 
 
