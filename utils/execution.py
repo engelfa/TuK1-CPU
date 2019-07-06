@@ -22,7 +22,7 @@ DEBUG = False
 CONCURRENCY = 40  # Simultaneously running jobs
 JOBS_PER_CORE = 10  # Subprocesses running on one CPU
 N_CORES = CONCURRENCY // JOBS_PER_CORE
-AFFINITY_OFFSET = 69
+AFFINITY_OFFSET = 10
 
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 
@@ -34,6 +34,8 @@ if DEBUG:
 
 par = None
 is_first_run = True
+is_numactl_supported = proc.check_numactl()
+print('Numactl Support:', is_numactl_supported)
 
 
 def prepare_execution():
@@ -232,15 +234,16 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
 def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=None):
     pid = os.getpid()
     dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
-    so, se = proc.run_command(f'taskset -cp {pid}')
-    dlog(so)
+    # so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
+    # so, se = proc.run_command(f'taskset -cp {pid}')
+    # dlog(so)
     if x_var is not None and x_value is not None:
         local_par[x_var] = x_value
-    results = run_cpp_code(list(local_par.values()))
-    core_temps = proc.get_cpu_core_temperatures()
-    for i in range(len(core_temps)):
-        results[f'cpu_temp_{i}'] = core_temps[i]
+    results = run_cpp_code(list(local_par.values()), affinity)
+    # Do not save CPU temps (just adds noise to results array)
+    # core_temps = proc.get_cpu_core_temperatures()
+    # for i in range(len(core_temps)):
+    #     results[f'cpu_temp_{i}'] = core_temps[i]
     dlog(results)
     if y_param2:
         return (x_value, float(results[y_param1]), float(results[y_param2]))
@@ -249,9 +252,9 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
     return (x_value, results)
 
 
-def run_cpp_code(par):
+def run_cpp_code(par, affinity):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    so, se = proc.run_command(cmd_call)
+    so, se = proc.run_command(cmd_call, affinity if is_numactl_supported else None)
     if len(so) == 0 or len(se) > 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)

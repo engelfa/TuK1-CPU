@@ -17,18 +17,36 @@ PICKLE_FORMAT = "pkl"
         'fixed_config': global par variable,
         'parameters_config': p,
         'x_label': x_label,
-        'y1_label?': y_param1,
+        'y1_label'?: y_param1,
         'y2_label'?: y_param2,
         'runs': [{
             'x': x_axis,
             'y1'?: y_axis1,
             'y2'?: y_axis2,
             'results'?: y_axis2,  // y1 or results need to be defined
-            'label?': label,
-            'title?': title,
+            'label'?: label,
+            'title'?: title,
         }, { ... }],
     }, { ... }]
 """
+
+
+def fake_results(x, y, x_label='', y1_label=None):
+    fake_par = {'result_format': -1, 'run_count': -1, 'clear_cache': -1, 'cache_size': -1,
+                 'pcm_set': -1, 'random_values': -1, 'column_size': -1, 'selectivity': -1,
+                 'reserve_memory': -1, 'use_if': -1, 'n_cores': -1, 'jobs_per_core': -1}
+    fake_p = [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 2}]
+    return [{
+        'single_plot': True,
+        'fixed_config': fake_par,
+        'parameters_config': fake_p,
+        'x_label': x_label,
+        'y1_label': y1_label,
+        'runs': [{
+            'x': x,
+            'y1': y
+        }]
+    }]
 
 
 def store_results(data_array):
