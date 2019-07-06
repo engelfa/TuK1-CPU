@@ -1,14 +1,19 @@
 import subprocess
 import psutil
+import os
 
 
 def check_numactl():
-    so, se = run_command('numactl')
-    is_numactl_supported = len(se) == 0
-    print(is_numactl_supported)
-    # print(so)
-    print(se)
-    assert False
+    if os.name == 'nt':
+        is_numactl_supported = False
+    else:
+        so, se = run_command('which numactl')
+        is_numactl_supported = len(so) > 0
+        print(is_numactl_supported)
+        print(so)
+        print('---------')
+        print(se)
+        assert False
     if not is_numactl_supported:
         print('Warning! numactl is not supported. Parallelization will still work but with shared memory')
     return is_numactl_supported
