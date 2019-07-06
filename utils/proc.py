@@ -18,7 +18,7 @@ def run_command(cmd_call, affinity=None):
     print('aff', affinity)
     if affinity is not None:
         assert False
-        cmd_call = f'numactl -N {affinity} -m {affinity} {cmd_call}'
+        cmd_call = f'numactl -N 0,1,2,3 -m 0,1,2,3 -C {affinity} {cmd_call}'
     proc = subprocess.Popen(
         cmd_call,
         shell=True,
