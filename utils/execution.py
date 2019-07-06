@@ -35,7 +35,7 @@ if DEBUG:
 par = None
 is_first_run = True
 is_numactl_supported = proc.check_numactl()
-print('numactl:', is_numactl_supported)
+print('Numactl Support:', is_numactl_supported)
 
 
 def prepare_execution():
@@ -240,9 +240,10 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
     if x_var is not None and x_value is not None:
         local_par[x_var] = x_value
     results = run_cpp_code(list(local_par.values()), affinity)
-    core_temps = proc.get_cpu_core_temperatures()
-    for i in range(len(core_temps)):
-        results[f'cpu_temp_{i}'] = core_temps[i]
+    # Do not save CPU temps (just adds noise to results array)
+    # core_temps = proc.get_cpu_core_temperatures()
+    # for i in range(len(core_temps)):
+    #     results[f'cpu_temp_{i}'] = core_temps[i]
     dlog(results)
     if y_param2:
         return (x_value, float(results[y_param1]), float(results[y_param2]))
