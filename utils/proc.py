@@ -17,7 +17,6 @@ def check_numactl():
 def run_command(cmd_call, affinity=None):
     print('aff', affinity)
     if affinity is not None:
-        assert False
         cmd_call = f'numactl -N {affinity} -m {affinity} {cmd_call}'
     proc = subprocess.Popen(
         cmd_call,
