@@ -34,6 +34,8 @@ if DEBUG:
 
 par = None
 is_first_run = True
+is_numactl_supported = proc.check_numactl()
+print('numactl:', is_numactl_supported)
 
 
 def prepare_execution():
@@ -251,7 +253,7 @@ def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=
 
 def run_cpp_code(par, affinity):
     cmd_call = PROGRAM_NAME + ' ' + ' '.join([str(x) for x in par])
-    so, se = proc.run_command(cmd_call, affinity)
+    so, se = proc.run_command(cmd_call, affinity if is_numactl_supported else None)
     if len(so) == 0 or len(se) > 0:
         print(f'Calling `{cmd_call}` failed')
         print('Error response: ', se)
