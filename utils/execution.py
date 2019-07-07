@@ -22,7 +22,7 @@ DEBUG = False
 CONCURRENCY = 40  # Simultaneously running jobs
 JOBS_PER_CORE = 10  # Subprocesses running on one CPU
 N_CORES = CONCURRENCY // JOBS_PER_CORE
-AFFINITY_OFFSET = 0
+AFFINITY_OFFSET = 10
 
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 
