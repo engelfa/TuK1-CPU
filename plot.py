@@ -28,9 +28,8 @@ def execute():
             execute_plotting()
             return
         execute_cache_misses()
-        # execute_selectivity()
-        execute_multicore()
-        # execute_multicore(3)
+        execute_selectivity()
+        # execute_multicore(runs=500)
         # execute_benchmarks()
 
 
@@ -61,9 +60,17 @@ def execute_plotting():
     try:
         print("Multicore: ")
         data = load_results()
-        # generate_plots(data, 'gb_per_sec')  # Slide 42
-        generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
-        generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
+        generate_plots(data, 'gb_per_sec')  # Slide 42
+        # generate_plots(data, 'gb_per_sec', 'branch_mispredictions')
+        # generate_plots(data, 'gb_per_sec', 'stalled_cycles')  # Slide 41
+    except KeyboardInterrupt:
+        pass
+
+    # Result Formats: Compare performance of our formats in a bar chart
+    try:
+        print("Result Formats: ")
+        data = load_results()
+        generate_plots(data, 'gb_per_sec', bars=True)
     except KeyboardInterrupt:
         pass
 
@@ -87,34 +94,46 @@ def execute_cache_misses():
     announce_experiment(f'Cache Misses')
     # TESTME: use_if=1 should increase the effect since no preloading should be possible
     set_default_parameters(
-        {'result_format': 0, 'run_count': 1000, 'clear_cache': 1, 'cache_size': 40, 'pcm_set': 0, 'random_values': 1,
-         'column_size': 2e8, 'selectivity': 0.25, 'reserve_memory': 1, 'use_if': 1, 'n_cores': 60, 'jobs_per_core': 1})
+        {'result_format': 0, 'run_count': 500, 'clear_cache': 1, 'cache_size': 40, 'pcm_set': 0, 'random_values': 1,
+         'column_size': 2e8, 'selectivity': 0.1, 'reserve_memory': 1, 'use_if': 1, 'n_cores': 1, 'jobs_per_core': 1})
     data = generate_data(
-        [{'xParam': 'column_size', 'xMin': 3, 'xMax': 7, 'stepSize': 1e5, 'log': True, 'logSamples': 200}])
+        [{'xParam': 'column_size', 'xMin': 2, 'xMax': 8, 'stepSize': 1e5, 'log': True, 'logSamples': 20}])
     store_results(data)
 
 
 def execute_selectivity():
     announce_experiment(f'Selectivity (Bell Plot)')
+    # Not working for result_format=0
     # TESTME: Higher stepSize for selectivity
     # TESTME: Compare all result_formats
     set_default_parameters(
-        {'result_format': 2, 'run_count': 500, 'clear_cache': 0, 'cache_size': 20, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e6, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': 1})
+        {'result_format': 2, 'run_count': 500, 'clear_cache': 0, 'cache_size': 40, 'pcm_set': 1, 'random_values': 1,
+         'column_size': 1e8, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 80, 'jobs_per_core': 1})
     data = generate_data(
          [{'xParam': 'random_values', 'xMin': 0, 'xMax': 1, 'stepSize': 1},
-          {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.5}])
+          {'xParam': 'selectivity', 'xMin': 0, 'xMax': 1, 'stepSize': 0.05}])
     store_results(data)
 
 
-def execute_multicore(jobs=1):
+def execute_multicore(runs=500):
     announce_experiment(f'Multicore')
+    # result_format=0 is the fastest one
     # TESTME: Run with higher column size and/or run_count
     set_default_parameters(
-        {'result_format': 0, 'run_count': 200, 'clear_cache': 0, 'cache_size': 40, 'pcm_set': 1, 'random_values': 1,
-         'column_size': 2e7, 'selectivity': 0.25, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 2, 'jobs_per_core': jobs})
+        {'result_format': 1, 'run_count': runs, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
+         'column_size': 2e9, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 2, 'jobs_per_core': 1})
     data = generate_data(
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 4}])
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 1}])
+    store_results(data)
+
+
+def execute_result_formats():
+    announce_experiment(f'Result Formats')
+    set_default_parameters(
+        {'run_count': 25, 'clear_cache': 1, 'cache_size': 50, 'pcm_set': 1, 'random_values': 1,
+         'column_size': 2e7, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 1, 'jobs_per_core': 1})
+    data = generate_data(
+            [{'xParam': 'result_format', 'xMin': 0, 'xMax': 2, 'stepSize': 1}])
     store_results(data)
 
 
@@ -122,8 +141,8 @@ def execute_benchmarks():
     # cache misses over column size
     set_default_parameters(
         {'result_format': 0, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10,
-        'pcm_set': 0, 'random_values': 1, 'column_size': 200000000, 'selectivity': 0.1,
-        'reserve_memory': 0, 'use_if': 0, 'n_cores': 1, 'jobs_per_core': 1})
+         'pcm_set': 0, 'random_values': 1, 'column_size': 200000000, 'selectivity': 0.1,
+         'reserve_memory': 0, 'use_if': 0, 'n_cores': 1, 'jobs_per_core': 1})
 
     data1 = generate_data(
         [{'xParam': 'result_format', 'xMin': 0, 'xMax': 3, 'stepSize': 1},

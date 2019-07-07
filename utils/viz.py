@@ -122,7 +122,8 @@ def transform_data(data_array, y1_label=None, y2_label=None):
 
 
 # If separate equals true it will always prefer using multiple subplots than merging the lineplots in one
-def generate_plots(data_array, y1_label=None, y2_label=None, separate=False):
+def generate_plots(data_array, y1_label=None, y2_label=None, separate=False, bars=False):
+    # TODO: Create barchart
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
@@ -265,7 +266,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
     if PRESENTATION:
         if not log and max(x) >= 1e9:
             x = [x / 1e9 for x in x]
-            x_label = '[Bio]'
+            x_label = '[Bn]'
         elif not log and max(x) >= 1e6:
             x = [x / 1e6 for x in x]
             x_label = '[Mio]'
@@ -273,7 +274,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
             y1 = [x / 1e9 for x in y1]
             if y1_lim:
                 y1_lim = [x / 1e9 for x in y1_lim]
-            y1_label = '[Bio]'
+            y1_label = '[Bn]'
         elif max(*y1, *y1_lim) >= 1e6:
             y1 = [x / 1e6 for x in y1]
             if y1_lim:
@@ -283,7 +284,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
             y2 = [x / 1e9 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e9 for x in y2_lim]
-            y2_label = '[Bio]'
+            y2_label = '[Bn]'
         elif y2 and max(*y2, *y2_lim) >= 1e6:
             y2 = [x / 1e6 for x in y2]
             if y2_lim:
