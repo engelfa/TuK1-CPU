@@ -19,6 +19,7 @@ TEST = False
     same execution will then be triggered multiple times.
 """
 
+
 def execute():
     if TEST:
         execute_test_run()
@@ -122,8 +123,9 @@ def execute_multicore(runs=500):
     set_default_parameters(
         {'result_format': 1, 'run_count': runs, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
          'column_size': 2e9, 'selectivity': 0.1, 'reserve_memory': 0, 'use_if': 1, 'n_cores': 2, 'jobs_per_core': 1})
-    data = generate_data(
-         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 1}])
+    data = generate_data([{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 1}])
+    # data = generate_data([{'xParam': 'n_cores', 'xMin': 1, 'xMax': 20, 'stepSize': 1}])
+
     store_results(data)
 
 

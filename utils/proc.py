@@ -3,6 +3,10 @@ import psutil
 import os
 
 
+# ONE_NUMA_NODE = True
+ONE_NUMA_NODE = False
+
+
 def check_numactl():
     if os.name == 'nt':
         is_numactl_supported = False
@@ -16,8 +20,10 @@ def check_numactl():
 
 def run_command(cmd_call, affinity=None):
     # print('Running on CPU ', affinity)
+    if ONE_NUMA_NODE:
+        cmd_call = f'numactl -N 0 -m 0 -C {affinity} {cmd_call}'
     if affinity is not None:
-        cmd_call = f'numactl -N 0,1,2,3 -m 0,1,2,3 {cmd_call}'
+        cmd_call = f'numactl -N 0,1,2,3 -m 0,1,2,3 -C {affinity} {cmd_call}'
     proc = subprocess.Popen(
         cmd_call,
         shell=True,
