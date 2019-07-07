@@ -52,8 +52,8 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
     << scanConfig->USE_IF << ","
     << counter << ","
     << duration/benchmarkConfig.RUN_COUNT << ","
-    << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
-    << (scanConfig->COLUMN_SIZE*4/(double)1e9)/((duration/benchmarkConfig.RUN_COUNT)/(double)1e9) << ",";
+    << scanConfig->COLUMN_SIZE/(duration/(double)(1e9 * (uint64_t)benchmarkConfig.RUN_COUNT)) << ","
+    << (scanConfig->COLUMN_SIZE*4/(double)1e9)/(duration/(double)(1e9 * (uint64_t)benchmarkConfig.RUN_COUNT)) << ",";
   if (benchmarkConfig.PCM_SET == 1) {
     std::cout << papi_counts[0] << "," << papi_counts[1] << "," << papi_counts[2] << std::endl;
   } else {
@@ -128,12 +128,15 @@ int main(int argc, char *argv[]) {
   const size_t cache_size = benchmarkConfig.CACHE_SIZE * 1024 * 1024;
   std::vector<long> p(cache_size, 3);
   uint64_t cache_clear_duration = 0;
-  std::uniform_int_distribution<INT_COLUMN> cacheDist(0,std::numeric_limits<INT_COLUMN>::max());
+  std::uniform_int_distribution<INT_COLUMN> cacheDist(0,std::numeric_limits<INT_COLUMN>::max() - 19999);
   auto clear_cache_lambda = [&cacheDist, &e2, &p, &cache_size] () {
-                              for(auto i = 0; i < cache_size; ++i) {
-                                p[i] += cacheDist(e2);
-                              };
-                            };
+                                                std::vector<uint32_t> clear = 
+                                                          std::vector<uint32_t>(50 * 1000 * 1000, 1000000);
+                                                for (uint i = 0; i < clear.size(); ++i) {
+                                                    clear[i] += cacheDist(e2);
+                                                }
+                                                clear.resize(0);
+                                              };
   size_t scan_count = 1;
   std::vector<Scan> scans;
   scans.reserve(scan_count);
@@ -142,7 +145,7 @@ int main(int argc, char *argv[]) {
   auto scan = 0;
   ScanConfig scanConfig(atoi(argv[6]), atoi(argv[7]), atof(argv[8]), atoi(argv[9]), atoi(argv[10]));
 
-  INT_COLUMN min = 0, max = std::numeric_limits<INT_COLUMN>::max()-1;
+  INT_COLUMN min = 0, max = 19999;
   std::uniform_int_distribution<INT_COLUMN> dist(min,max);
 
   std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;
@@ -159,7 +162,7 @@ int main(int argc, char *argv[]) {
     auto values_for_selectivity = scanConfig.COLUMN_SIZE*scanConfig.SELECTIVITY;
 
     for (auto i = 0; i < values_for_selectivity; ++i) {
-      input[i] = std::numeric_limits<INT_COLUMN>::max();
+      input[i] = 20000;
     }
     for (auto i = values_for_selectivity; i < scanConfig.COLUMN_SIZE; ++i) {
       input[i] = dist(e2);
@@ -320,7 +323,7 @@ int main(int argc, char *argv[]) {
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         // Counter is only last run
         auto bitmask_lambda = [&bitmask, scan] (uint64_t i) {bitmask[i] = true;};
-        auto bitmask_lambda_without_if = [&bitmask, &input, &scan] (uint64_t i) {bitmask[i] = input[i] == std::numeric_limits<INT_COLUMN>::max();};
+        auto bitmask_lambda_without_if = [&bitmask, &input, &scan] (uint64_t i) {bitmask[i] = input[i] == 20000;};
         auto bitmask_before_lambda = [&bitmask, scan] () {bitmask.clear();};
 #if IS_PAPI
         PAPI_start(event_set);

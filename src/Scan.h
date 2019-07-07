@@ -15,7 +15,7 @@ class Scan {
       for (size_t run = 0; run < runs; ++run) {
         before_loop();
         for (uint64_t i = 0; i < config->COLUMN_SIZE; ++i) {
-          if (input_column[i] == std::numeric_limits<INT_COLUMN>::max()) {
+          if (input_column[i] == 20000) {
             in_loop(i);
           }
         }
