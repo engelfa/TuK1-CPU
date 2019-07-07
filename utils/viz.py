@@ -266,7 +266,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
     if PRESENTATION:
         if not log and max(x) >= 1e9:
             x = [x / 1e9 for x in x]
-            x_label = '[Bio]'
+            x_label = '[Bn]'
         elif not log and max(x) >= 1e6:
             x = [x / 1e6 for x in x]
             x_label = '[Mio]'
@@ -274,7 +274,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
             y1 = [x / 1e9 for x in y1]
             if y1_lim:
                 y1_lim = [x / 1e9 for x in y1_lim]
-            y1_label = '[Bio]'
+            y1_label = '[Bn]'
         elif max(*y1, *y1_lim) >= 1e6:
             y1 = [x / 1e6 for x in y1]
             if y1_lim:
@@ -284,7 +284,7 @@ def handle_units(x, x_label, y1, y1_label, y2=None, y2_label=None, y1_lim=None, 
             y2 = [x / 1e9 for x in y2]
             if y2_lim:
                 y2_lim = [x / 1e9 for x in y2_lim]
-            y2_label = '[Bio]'
+            y2_label = '[Bn]'
         elif y2 and max(*y2, *y2_lim) >= 1e6:
             y2 = [x / 1e6 for x in y2]
             if y2_lim:
