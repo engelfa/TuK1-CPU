@@ -123,7 +123,7 @@ def transform_data(data_array, y1_label=None, y2_label=None):
 
 # If separate equals true it will always prefer using multiple subplots than merging the lineplots in one
 def generate_plots(data_array, y1_label=None, y2_label=None, separate=False, bars=False):
-    #TODO: Create barchart
+    # TODO: Create barchart
     data_array = transform_data(data_array, y1_label, y2_label)
     limits = find_y_min_max(data_array)
     for data in data_array:
