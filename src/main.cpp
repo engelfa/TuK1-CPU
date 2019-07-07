@@ -31,7 +31,6 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
 #else
   std::cout << "- PAPI is available" << std::endl;
 #endif
-  std::cout << "- Test" << std::endl;
   std::cout << "- Took " << duration/(double)1e6 << " ms" << std::endl;
   std::cout << "result_format,run_count,clear_cache,cache_size,pcm_set,random_values,column_size,selectivity,"
                   "reserve_memory,use_if,hits,duration,rows_per_sec,gb_per_sec,";
@@ -54,7 +53,7 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
     << counter << ","
     << duration/benchmarkConfig.RUN_COUNT << ","
     << scanConfig->COLUMN_SIZE/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ","
-    << (scanConfig->COLUMN_SIZE*2/(double)1e9)/((duration/(double)1e9)/benchmarkConfig.RUN_COUNT) << ",";
+    << (scanConfig->COLUMN_SIZE*4/(double)1e9)/((duration/benchmarkConfig.RUN_COUNT)/(double)1e9) << ",";
   if (benchmarkConfig.PCM_SET == 1) {
     std::cout << papi_counts[0] << "," << papi_counts[1] << "," << papi_counts[2] << std::endl;
   } else {
@@ -65,7 +64,7 @@ void print_result(const uint64_t duration, const BenchmarkConfig& benchmarkConfi
 
 uint64_t convert_duration(const BenchmarkConfig& benchmarkConfig, uint64_t duration, uint64_t cache_clear_duration) {
   if (benchmarkConfig.CLEAR_CACHE) {
-    return duration - (cache_clear_duration * benchmarkConfig.RUN_COUNT);
+    return duration;// - (cache_clear_duration * benchmarkConfig.RUN_COUNT);
   } else {
     return duration;
   }
@@ -127,16 +126,14 @@ int main(int argc, char *argv[]) {
   // TODO: graph -> multiple scan support > write arguments in file
 
   const size_t cache_size = benchmarkConfig.CACHE_SIZE * 1024 * 1024;
-  std::vector<long> p(cache_size, 0);
+  std::vector<long> p(cache_size, 3);
   uint64_t cache_clear_duration = 0;
   std::uniform_int_distribution<INT_COLUMN> cacheDist(0,std::numeric_limits<INT_COLUMN>::max());
   auto clear_cache_lambda = [&cacheDist, &e2, &p, &cache_size] () {
                               for(auto i = 0; i < cache_size; ++i) {
-                                p[i] = cacheDist(e2);
+                                p[i] += cacheDist(e2);
                               };
                             };
-  auto keep_cache_lambda = [] () {};
-
   size_t scan_count = 1;
   std::vector<Scan> scans;
   scans.reserve(scan_count);
@@ -145,7 +142,7 @@ int main(int argc, char *argv[]) {
   auto scan = 0;
   ScanConfig scanConfig(atoi(argv[6]), atoi(argv[7]), atof(argv[8]), atoi(argv[9]), atoi(argv[10]));
 
-  INT_COLUMN min = 1, max = std::numeric_limits<INT_COLUMN>::max();
+  INT_COLUMN min = 0, max = std::numeric_limits<INT_COLUMN>::max()-1;
   std::uniform_int_distribution<INT_COLUMN> dist(min,max);
 
   std::cout << "- Initialize Input Vector for Scan " << scan + 1 << std::endl;
@@ -162,7 +159,7 @@ int main(int argc, char *argv[]) {
     auto values_for_selectivity = scanConfig.COLUMN_SIZE*scanConfig.SELECTIVITY;
 
     for (auto i = 0; i < values_for_selectivity; ++i) {
-      input[i] = 0;
+      input[i] = std::numeric_limits<INT_COLUMN>::max();
     }
     for (auto i = values_for_selectivity; i < scanConfig.COLUMN_SIZE; ++i) {
       input[i] = dist(e2);
@@ -186,19 +183,19 @@ int main(int argc, char *argv[]) {
   scans.push_back(Scan(std::make_shared<ScanConfig>(scanConfig)));
   //}
 
-  if (benchmarkConfig.CLEAR_CACHE) {
-    std::cout << "- Determine Cache Clearing Duration" << std::endl;
-    const auto before = std::chrono::steady_clock::now();
-    for (auto i = 0; i < benchmarkConfig.RUN_COUNT/10; ++i) {
-      for(auto i = 0; i < cache_size; ++i) {
-         p[i] = cacheDist(e2);
-      }
-    }
-    const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
-        (std::chrono::steady_clock::now() - before);
-    cache_clear_duration = duration.count() / (benchmarkConfig.RUN_COUNT/10);
-    std::cout << "- Took " << duration.count()/(double)1e6 << " ms" << std::endl;
-  }
+  // if (benchmarkConfig.CLEAR_CACHE) {
+  //   std::cout << "- Determine Cache Clearing Duration" << std::endl;
+  //   const auto before = std::chrono::steady_clock::now();
+  //   for (auto i = 0; i < benchmarkConfig.RUN_COUNT/10; ++i) {
+  //     for(auto i = 0; i < cache_size; ++i) {
+  //        p[i] = cacheDist(e2);
+  //     }
+  //   }
+  //   const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+  //       (std::chrono::steady_clock::now() - before);
+  //   cache_clear_duration = duration.count() / (benchmarkConfig.RUN_COUNT/10);
+  //   std::cout << "- Took " << duration.count()/(double)1e6 << " ms" << std::endl;
+  // }
 
   std::cout << "- Start Benchmark" << std::endl;
   switch(benchmarkConfig.RESULT_FORMAT) {
@@ -217,16 +214,16 @@ int main(int argc, char *argv[]) {
 #endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, counter_lambda, counter_before_lambda, clear_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, counter_lambda, counter_before_lambda);
         } else {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, counter_lambda, counter_before_lambda, keep_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, counter_lambda, counter_before_lambda);
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
 #if IS_PAPI
         PAPI_stop(event_set, papi_counts);
 #endif
-
+        clear_cache_lambda();
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
         // Return counters for first scan (since there is currently only one scan)
@@ -252,16 +249,16 @@ int main(int argc, char *argv[]) {
 #endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, positionList_lambda, positionList_before_lambda, clear_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, positionList_lambda, positionList_before_lambda);
         } else {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, positionList_lambda, positionList_before_lambda, keep_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, positionList_lambda, positionList_before_lambda);
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
 #if IS_PAPI
         PAPI_stop(event_set, papi_counts);
 #endif
-
+        clear_cache_lambda();
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
         // Only first scan; counter is from last run only (it's cleared before every run)
@@ -284,16 +281,16 @@ int main(int argc, char *argv[]) {
 #endif
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda);
         } else {
-          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+          scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda);
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
             (std::chrono::steady_clock::now() - before);
 #if IS_PAPI
         PAPI_stop(event_set, papi_counts);
 #endif
-
+        clear_cache_lambda();
         auto converted_duration = convert_duration(benchmarkConfig, duration.count(), cache_clear_duration);
 
         // Manually count since count(bitmask.begin() ...) did not work.
@@ -323,7 +320,7 @@ int main(int argc, char *argv[]) {
       for (auto scan = size_t(0); scan < scan_count; ++scan) {
         // Counter is only last run
         auto bitmask_lambda = [&bitmask, scan] (uint64_t i) {bitmask[i] = true;};
-        auto bitmask_lambda_without_if = [&bitmask, &input, &scan] (uint64_t i) {bitmask[i] = input[i] == 0;};
+        auto bitmask_lambda_without_if = [&bitmask, &input, &scan] (uint64_t i) {bitmask[i] = input[i] == std::numeric_limits<INT_COLUMN>::max();};
         auto bitmask_before_lambda = [&bitmask, scan] () {bitmask.clear();};
 #if IS_PAPI
         PAPI_start(event_set);
@@ -331,15 +328,15 @@ int main(int argc, char *argv[]) {
         const auto before = std::chrono::steady_clock::now();
         if (benchmarkConfig.CLEAR_CACHE) {
           if (scans[scan].config->USE_IF) {
-            scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda, clear_cache_lambda);
+            scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda);
           } else {
-            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda, clear_cache_lambda);
+            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda);
           }
         } else {
           if (scans[scan].config->USE_IF) {
-            scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda, keep_cache_lambda);
+            scans[scan].execute(benchmarkConfig.RUN_COUNT, input, bitmask_lambda, bitmask_before_lambda);
           } else {
-            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda, keep_cache_lambda);
+            scans[scan].execute_without_if(benchmarkConfig.RUN_COUNT, bitmask_lambda_without_if, bitmask_before_lambda);
           }
         }
         const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -347,7 +344,7 @@ int main(int argc, char *argv[]) {
 #if IS_PAPI
         PAPI_stop(event_set, papi_counts);
 #endif
-
+        clear_cache_lambda();
         for (uint64_t i = 0; i < scans[scan].config->COLUMN_SIZE; ++i) {
           if(bitmask[i] == true)
             counter++;

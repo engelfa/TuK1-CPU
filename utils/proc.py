@@ -15,7 +15,7 @@ def check_numactl():
 
 
 def run_command(cmd_call, affinity=None):
-    print('Running on CPU ', affinity)
+    # print('Running on CPU ', affinity)
     if affinity is not None:
         cmd_call = f'numactl -N 0,1,2,3 -m 0,1,2,3 {cmd_call}'
     proc = subprocess.Popen(

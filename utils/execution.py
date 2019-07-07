@@ -22,7 +22,7 @@ DEBUG = False
 CONCURRENCY = 40  # Simultaneously running jobs
 JOBS_PER_CORE = 10  # Subprocesses running on one CPU
 N_CORES = CONCURRENCY // JOBS_PER_CORE
-AFFINITY_OFFSET = 10
+AFFINITY_OFFSET = 0
 
 PROGRAM_NAME = os.path.abspath("./build/tuk_cpu")
 
@@ -236,9 +236,9 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
 def run_single_job(local_par, y_param1, y_param2, affinity, x_var=None, x_value=None):
     pid = os.getpid()
     dlog(f'{x_value} - PID: {pid}, Set CPU affinity: {affinity}')
-    # so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
-    # so, se = proc.run_command(f'taskset -cp {pid}')
-    # dlog(so)
+    so, se = proc.run_command(f'taskset -cp {affinity} {pid}')
+    so, se = proc.run_command(f'taskset -cp {pid}')
+    dlog(so)
     if x_var is not None and x_value is not None:
         local_par[x_var] = x_value
     results = run_cpp_code(list(local_par.values()), affinity)
