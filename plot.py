@@ -99,6 +99,7 @@ def execute_cache_misses():
 
 def execute_selectivity():
     announce_experiment(f'Selectivity (Bell Plot)')
+    # Not working for result_format=0
     # TESTME: Higher stepSize for selectivity
     # TESTME: Compare all result_formats
     set_default_parameters(
@@ -112,6 +113,19 @@ def execute_selectivity():
 
 def execute_multicore(jobs=1):
     announce_experiment(f'Multicore')
+    # result_format=0 is the fastest one
+    # TESTME: Run with higher column size and/or run_count
+    set_default_parameters(
+        {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
+         'column_size': 2e9, 'selectivity': 0.2, 'reserve_memory': 0, 'use_if': 0, 'n_cores': 2, 'jobs_per_core': jobs})
+    data = generate_data(
+         [{'xParam': 'n_cores', 'xMin': 1, 'xMax': 80, 'stepSize': 1}])
+    store_results(data)
+
+
+def execute_result_formats(jobs=1):
+    announce_experiment(f'Result Formats')
+    # result_format=0 is the fastest one
     # TESTME: Run with higher column size and/or run_count
     set_default_parameters(
         {'result_format': 1, 'run_count': 25, 'clear_cache': 0, 'cache_size': 10, 'pcm_set': 1, 'random_values': 1,
