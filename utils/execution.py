@@ -221,7 +221,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
         results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
         assert all(x[0] <= y[0] for x, y in zip(results, results[1:])), \
             "Multithreaded results are in right order"
-        if y_param2 and y_param2:
+        if y_param1 and y_param2:
             _, y_axis1, y_axis2 = zip(*results)
         else:  # y_param1 is not None and y_param2 is None or both are None
             _, y_axis1 = zip(*results)
