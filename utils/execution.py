@@ -187,7 +187,7 @@ def gather_plot_data(query_params, y_param1=None, y_param2=None):
                 jobs_per_core = x_val
             if query_params['xParam'] == 'n_cores':
                 concurrency = x_val
-            cpu_affinities = [i // jobs_per_core for i in range(x_val)]
+            cpu_affinities = [AFFINITY_OFFSET + i // jobs_per_core for i in range(x_val)]
             executors = (delayed(run_single_job)(dict(cpp_par), y_param1, y_param2, affinity)
                          for affinity in tqdm(cpu_affinities, ascii=True))
             temp_results = Parallel(n_jobs=concurrency, backend="multiprocessing")(executors)
